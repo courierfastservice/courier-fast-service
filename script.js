@@ -93,8 +93,8 @@ async function trackPackage() {
     }
 
     if (step === "Delivered" && data.status === "Delivered") {
-      className += " active";
-      icon = "🏠";
+  className += " complete";
+  icon = "✓";
     }
 
     const label = step === "Processing" ? "Processing at Sorting Center" : step;
