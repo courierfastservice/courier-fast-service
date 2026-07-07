@@ -132,8 +132,7 @@ function renderTracking(data) {
         <div class="route-line">
           <div class="route-fill" style="width:${percent}%;"></div>
         </div>
-        <div class="route-truck" style="left:${percent}%;">🚚</div>
-      </div>
+        <div class="route-truck" style="left:calc(${percent}% - 15px);">🚚</div>
 
       <div class="tracking-steps">
         ${stepsHTML}
