@@ -29,15 +29,14 @@ body {
 }
 
 .logo {
-  width: 52px;
-  height: 52px;
-  background: white;
-  color: #0b6efd;
+  width: 70px;
+  height: 70px;
   border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font-weight: 900;
+  object-fit: cover;
+  background: white;
 }
+  
+  
 
 .brand span {
   display: block;
