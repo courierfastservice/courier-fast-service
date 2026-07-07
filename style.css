@@ -211,12 +211,14 @@ footer {
   }
 }
 .hero-image img {
-  width: 100%;
-  max-width: 720px;
-  border-radius: 22px;
-  display: block;
-  margin: 0 auto 30px;
-}
+    width: 100%;
+    max-width: 700px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 22px;
+    display: block;
+    margin: 0 auto 30px;
+    }
 .hero-image {
   grid-column: 1 / -1;
   width: 100%;
