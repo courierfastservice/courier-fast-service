@@ -1,1 +1,89 @@
-customer 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers | Courier Fast Service</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="admin-page">
+    <section class="admin-card">
+      <h1>Courier Fast Service</h1>
+      <h2>Customer Registration</h2>
+      <p>Create sender or receiver customer records.</p>
+
+      <form id="customerForm">
+        <label>Customer Type</label>
+        <select id="customerType">
+          <option value="Sender">Sender</option>
+          <option value="Receiver">Receiver</option>
+        </select>
+
+        <label>Full Name *</label>
+        <input id="customerName" type="text" placeholder="Enter full name" required />
+
+        <label>Country *</label>
+        <input id="customerCountry" type="text" placeholder="Enter country" required />
+
+        <label>Phone Number</label>
+        <input id="customerPhone" type="text" placeholder="Optional" />
+
+        <label>Email</label>
+        <input id="customerEmail" type="email" placeholder="Optional" />
+
+        <label>City</label>
+        <input id="customerCity" type="text" placeholder="Optional" />
+
+        <label>Postal Code</label>
+        <input id="customerPostalCode" type="text" placeholder="Optional" />
+
+        <button type="submit">Save Customer</button>
+      </form>
+
+      <div id="customerResult"></div>
+
+      <p style="margin-top:20px;">
+        <a href="dashboard.html">Back to Dashboard</a>
+      </p>
+    </section>
+  </main>
+
+  <script type="module">
+    import { database } from "./firebase-config.js";
+    import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const customerForm = document.getElementById("customerForm");
+    const customerResult = document.getElementById("customerResult");
+
+    customerForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const customerData = {
+        type: document.getElementById("customerType").value,
+        name: document.getElementById("customerName").value.trim(),
+        country: document.getElementById("customerCountry").value.trim(),
+        phone: document.getElementById("customerPhone").value.trim(),
+        email: document.getElementById("customerEmail").value.trim(),
+        city: document.getElementById("customerCity").value.trim(),
+        postalCode: document.getElementById("customerPostalCode").value.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      if (!customerData.name || !customerData.country) {
+        customerResult.innerHTML = "<p style='color:red;'>Name and country are required.</p>";
+        return;
+      }
+
+      const newCustomerRef = push(ref(database, "customers"));
+
+      await set(newCustomerRef, customerData);
+
+      customerResult.innerHTML = "<p style='color:green;'><strong>Customer saved successfully.</strong></p>";
+      customerForm.reset();
+    });
+  </script>
+
+</body>
+</html>
