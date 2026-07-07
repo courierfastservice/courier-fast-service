@@ -346,8 +346,8 @@ footer {
   transform: translateX(-50%);
   font-size: 30px;
   z-index: 5;
-  transition: left 0.8s ease;
-  animation: truckBounce 0.8s infinite alternate;
+  transition: left 0.8s ease-in-out;
+  animation: none;
 }
 
 .tracking-steps {
@@ -444,14 +444,7 @@ footer {
   }
 }
 
-@keyframes truckBounce {
-  from {
-    transform: translateX(-50%) translateY(0);
-  }
-  to {
-    transform: translateX(-50%) translateY(-5px);
-  }
-}
+
 
 @keyframes pulse {
   0%, 100% {
