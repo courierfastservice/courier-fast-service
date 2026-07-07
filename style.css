@@ -586,3 +586,80 @@ footer {
     transform: translateX(-50%) translateX(-8px);
   }
   }
+/* ===========================
+   ADMIN DASHBOARD
+=========================== */
+
+.admin-page{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:60px 20px;
+    background:#f4f7fb;
+}
+
+.admin-card{
+    background:#fff;
+    width:100%;
+    max-width:700px;
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 15px 40px rgba(0,0,0,.12);
+}
+
+.admin-card h1{
+    color:#0057d8;
+    margin-bottom:8px;
+}
+
+.admin-card h2{
+    margin-bottom:8px;
+}
+
+.admin-card p{
+    color:#666;
+    margin-bottom:25px;
+}
+
+.admin-card label{
+    display:block;
+    margin-top:18px;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+.admin-card input,
+.admin-card select,
+.admin-card textarea{
+    width:100%;
+    padding:14px;
+    border:1px solid #d9d9d9;
+    border-radius:10px;
+    font-size:16px;
+}
+
+.admin-card textarea{
+    min-height:130px;
+    resize:vertical;
+}
+
+.admin-card button{
+    width:100%;
+    margin-top:25px;
+    background:#0057d8;
+    color:#fff;
+    border:none;
+    padding:15px;
+    border-radius:10px;
+    font-size:17px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.admin-card button:hover{
+    background:#0043aa;
+}
+
+#adminResult{
+    margin-top:20px;
+  }
