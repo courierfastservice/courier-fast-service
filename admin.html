@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courier Fast Service Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="admin-page">
+    <div class="admin-card">
+      <h1>Courier Fast Service</h1>
+      <h2>Admin Dashboard</h2>
+      <p>Update package tracking information.</p>
+
+      <label>Tracking Number</label>
+      <input id="adminTrackingNumber" type="text" placeholder="Example: CFS333444">
+
+      <label>Status</label>
+      <select id="adminStatus">
+        <option value="Shipment Received">Shipment Received</option>
+        <option value="Processing">Processing</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Out for Delivery">Out for Delivery</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+
+      <label>Current Location</label>
+      <input id="adminLocation" type="text" placeholder="Example: Shulin District, Taiwan">
+
+      <label>Last Updated</label>
+      <input id="adminUpdated" type="text" placeholder="Example: 10 July 2026">
+
+      <label>Message</label>
+      <textarea id="adminMessage" placeholder="Write package update message"></textarea>
+
+      <button onclick="saveTrackingUpdate()">Save Update</button>
+
+      <div id="adminResult"></div>
+    </div>
+  </main>
+
+  <script>
+    function saveTrackingUpdate() {
+      const trackingNumber = document.getElementById("adminTrackingNumber").value.trim().toUpperCase();
+      const status = document.getElementById("adminStatus").value;
+      const location = document.getElementById("adminLocation").value.trim();
+      const updated = document.getElementById("adminUpdated").value.trim();
+      const message = document.getElementById("adminMessage").value.trim();
+      const result = document.getElementById("adminResult");
+
+      if (!trackingNumber || !location || !updated || !message) {
+        result.innerHTML = "<p style='color:#c00000;'><strong>Please fill all fields.</strong></p>";
+        return;
+      }
+
+      const packageData = {
+        status: status,
+        location: location,
+        updated: updated,
+        message: message
+      };
+
+      localStorage.setItem(trackingNumber, JSON.stringify(packageData));
+
+      result.innerHTML = `
+        <div style="margin-top:20px;padding:15px;background:#eaf8ef;border-radius:10px;color:#065f46;">
+          <strong>Update saved successfully.</strong><br>
+          Tracking Number: ${trackingNumber}<br>
+          Status: ${status}
+        </div>
+      `;
+    }
+  </script>
+
+</body>
+                                                                               </html>
