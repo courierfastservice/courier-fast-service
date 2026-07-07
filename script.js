@@ -5,14 +5,12 @@ const trackingData = {
     updated: "9 July 2026",
     message: "Your package has departed the sorting center and is on its way."
   },
-
   "CFS654321": {
     status: "Delivered",
     location: "New Taipei City, Taiwan",
     updated: "8 July 2026",
     message: "Package successfully delivered to the recipient."
   },
-
   "CFS111222": {
     status: "Processing",
     location: "Los Angeles, USA",
@@ -25,23 +23,21 @@ function trackPackage() {
   const input = document.getElementById("trackingInput").value.trim().toUpperCase();
   const result = document.getElementById("trackingResult");
 
+  result.style.display = "block";
+
   if (trackingData[input]) {
     const data = trackingData[input];
 
     result.innerHTML = `
-      <div style="margin-top:20px;padding:15px;border-radius:10px;background:#eef7ff;">
-        <h3>Tracking Result</h3>
-        <p><strong>Status:</strong> ${data.status}</p>
-        <p><strong>Current Location:</strong> ${data.location}</p>
-        <p><strong>Last Updated:</strong> ${data.updated}</p>
-        <p>${data.message}</p>
-      </div>
+      <h3>Tracking Result</h3>
+      <p><strong>Status:</strong> ${data.status}</p>
+      <p><strong>Current Location:</strong> ${data.location}</p>
+      <p><strong>Last Updated:</strong> ${data.updated}</p>
+      <p>${data.message}</p>
     `;
   } else {
     result.innerHTML = `
-      <div style="margin-top:20px;padding:15px;border-radius:10px;background:#ffeaea;color:#c00000;">
-        Tracking number not found.
-      </div>
+      <p style="color:#c00000;"><strong>Tracking number not found.</strong></p>
     `;
   }
 }
