@@ -72,3 +72,47 @@ ${data.message}
     `;
   }
 }
+.route-line {
+  margin: 18px 0;
+  background: #e8eef7;
+  border-radius: 20px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.route-fill {
+  height: 100%;
+  width: 65%;
+  background: linear-gradient(90deg, #28a745, #ff9800);
+  border-radius: 20px;
+  animation: moveRoute 2s infinite;
+}
+
+@keyframes moveRoute {
+  0% {
+    opacity: .7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .7;
+  }
+}
+
+.route-truck {
+  font-size: 28px;
+  animation: truckMove 2.5s infinite;
+}
+
+@keyframes truckMove {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(18px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+                   }
