@@ -55,7 +55,7 @@ body {
   display: grid;
   grid-template-columns: 1.2fr .8fr;
   gap: 40px;
-  padding: 70px 8%;
+  padding: 30px 8% 60px;
   align-items: center;
 }
 
@@ -213,12 +213,12 @@ footer {
 .hero-image img {
     width: 100%;
     max-width: 700px;
-    height: 280px;
+    height: 230px;
     object-fit: cover;
     border-radius: 22px;
     display: block;
-    margin: 0 auto 30px;
-    }
+    margin: 0 auto 25px;
+  }
 .hero-image {
   grid-column: 1 / -1;
   width: 100%;
