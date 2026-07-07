@@ -38,85 +38,43 @@ function trackPackage() {
     const data = trackingData[input];
 
     result.innerHTML = `
-<h3>Tracking Progress</h3>
-<div class="route-line">
-  <div class="route-fill"></div>
-</div>
+      <h3>Tracking Progress</h3>
 
-<div class="route-truck">🚚</div>
-<div class="step ${["Processing","In Transit","Out for Delivery","Delivered"].includes(data.status) ? "complete" : ""}">
-✓ Shipment Received
-</div>
+      <div class="route-line">
+        <div class="route-fill"></div>
+      </div>
 
-<div class="step ${["In Transit","Out for Delivery","Delivered"].includes(data.status) ? "complete" : data.status==="Processing" ? "active" : ""}">
-📦 Processing at Sorting Center
-</div>
+      <div class="route-truck">🚚</div>
 
-<div class="step ${["Out for Delivery","Delivered"].includes(data.status) ? "complete" : data.status==="In Transit" ? "active" : ""}">
-🚚 In Transit
-</div>
+      <div class="step ${["Processing", "In Transit", "Out for Delivery", "Delivered"].includes(data.status) ? "complete" : ""}">
+        ✓ Shipment Received
+      </div>
 
-<div class="step ${data.status==="Delivered" ? "complete" : data.status==="Out for Delivery" ? "active" : ""}">
-📦 Out for Delivery
-</div>
+      <div class="step ${["In Transit", "Out for Delivery", "Delivered"].includes(data.status) ? "complete" : data.status === "Processing" ? "active" : ""}">
+        📦 Processing at Sorting Center
+      </div>
 
-<div class="step ${data.status==="Delivered" ? "active" : ""}">
-🏠 Delivered
-</div>
+      <div class="step ${["Out for Delivery", "Delivered"].includes(data.status) ? "complete" : data.status === "In Transit" ? "active" : ""}">
+        🚚 In Transit
+      </div>
 
-<div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:10px;">
-<strong>Current Location:</strong> ${data.location}<br><br>
-<strong>Last Updated:</strong> ${data.updated}<br><br>
-${data.message}
-</div>
-`;
+      <div class="step ${data.status === "Delivered" ? "complete" : data.status === "Out for Delivery" ? "active" : ""}">
+        📦 Out for Delivery
+      </div>
+
+      <div class="step ${data.status === "Delivered" ? "active" : ""}">
+        🏠 Delivered
+      </div>
+
+      <div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:10px;">
+        <strong>Current Location:</strong> ${data.location}<br><br>
+        <strong>Last Updated:</strong> ${data.updated}<br><br>
+        ${data.message}
+      </div>
+    `;
   } else {
     result.innerHTML = `
       <p style="color:#c00000;"><strong>Tracking number not found.</strong></p>
     `;
   }
 }
-.route-line {
-  margin: 18px 0;
-  background: #e8eef7;
-  border-radius: 20px;
-  height: 12px;
-  overflow: hidden;
-}
-
-.route-fill {
-  height: 100%;
-  width: 65%;
-  background: linear-gradient(90deg, #28a745, #ff9800);
-  border-radius: 20px;
-  animation: moveRoute 2s infinite;
-}
-
-@keyframes moveRoute {
-  0% {
-    opacity: .7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: .7;
-  }
-}
-
-.route-truck {
-  font-size: 28px;
-  animation: truckMove 2.5s infinite;
-}
-
-@keyframes truckMove {
-  0% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(18px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-                   }
