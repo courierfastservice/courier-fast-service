@@ -39,7 +39,11 @@ function trackPackage() {
 
     result.innerHTML = `
 <h3>Tracking Progress</h3>
+<div class="route-line">
+  <div class="route-fill"></div>
+</div>
 
+<div class="route-truck">🚚</div>
 <div class="step ${["Processing","In Transit","Out for Delivery","Delivered"].includes(data.status) ? "complete" : ""}">
 ✓ Shipment Received
 </div>
