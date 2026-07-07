@@ -1,4 +1,4 @@
-const trackingData = {
+ const trackingData = {
   "CFS123456": {
     status: "In Transit",
     location: "Bangkok, Thailand",
@@ -28,53 +28,124 @@ const trackingData = {
   }
 };
 
+const statusSteps = [
+  "Shipment Received",
+  "Processing",
+  "In Transit",
+  "Out for Delivery",
+  "Delivered"
+];
+
+const statusLabels = {
+  "Shipment Received": "Shipment Received",
+  "Processing": "Processing at Sorting Center",
+  "In Transit": "In Transit",
+  "Out for Delivery": "Out for Delivery",
+  "Delivered": "Delivered"
+};
+
+const statusIcons = {
+  "Shipment Received": "✓",
+  "Processing": "📦",
+  "In Transit": "🚚",
+  "Out for Delivery": "📦",
+  "Delivered": "🏠"
+};
+
+const progressPercent = {
+  "Shipment Received": 10,
+  "Processing": 25,
+  "In Transit": 50,
+  "Out for Delivery": 75,
+  "Delivered": 100
+};
+
+function cleanTrackingNumber(value) {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
 function trackPackage() {
-  const input = document.getElementById("trackingInput").value.trim().toUpperCase();
-  const result = document.getElementById("trackingResult");
+  const inputBox = document.getElementById("trackingInput");
+  const resultBox = document.getElementById("trackingResult");
 
-  result.style.display = "block";
+  const input = cleanTrackingNumber(inputBox.value);
 
-  if (trackingData[input]) {
-    const data = trackingData[input];
+  resultBox.style.display = "block";
 
-    result.innerHTML = `
+  if (!trackingData[input]) {
+    resultBox.innerHTML = `
+      <div class="tracking-error">
+        <strong>Tracking number not found.</strong><br>
+        Please check the tracking number and try again.
+      </div>
+    `;
+    return;
+  }
+
+  const data = trackingData[input];
+  renderTracking(data);
+}
+
+function renderTracking(data) {
+  const resultBox = document.getElementById("trackingResult");
+  const currentIndex = statusSteps.indexOf(data.status);
+  const percent = progressPercent[data.status] || 10;
+
+  const stepsHTML = statusSteps.map((step, index) => {
+    let stepClass = "tracking-step";
+
+    if (index < currentIndex) {
+      stepClass += " completed";
+    }
+
+    if (index === currentIndex) {
+      stepClass += " active";
+    }
+
+    if (data.status === "Delivered") {
+      stepClass = "tracking-step completed";
+    }
+
+    const checkIcon = index < currentIndex || data.status === "Delivered" ? "✓" : statusIcons[step];
+
+    return `
+      <div class="${stepClass}">
+        <div class="step-icon">${checkIcon}</div>
+        <div class="step-text">${statusLabels[step]}</div>
+      </div>
+    `;
+  }).join("");
+
+  const deliveredSuccess = data.status === "Delivered" ? `
+    <div class="delivered-success">
+      <div class="delivered-check">✓</div>
+      <h3>Delivery Completed</h3>
+      <p>This package has been successfully delivered.</p>
+    </div>
+  ` : "";
+
+  resultBox.innerHTML = `
+    <div class="tracking-panel">
       <h3>Tracking Progress</h3>
 
-      <div class="route-line">
-        <div class="route-fill"></div>
+      <div class="route-wrap">
+        <div class="route-line">
+          <div class="route-fill" style="width:${percent}%;"></div>
+        </div>
+        <div class="route-truck" style="left:${percent}%;">🚚</div>
       </div>
 
-      <div class="route-truck">🚚</div>
-
-      <div class="step ${["Processing", "In Transit", "Out for Delivery", "Delivered"].includes(data.status) ? "complete" : ""}">
-        ✓ Shipment Received
+      <div class="tracking-steps">
+        ${stepsHTML}
       </div>
 
-      <div class="step ${["In Transit", "Out for Delivery", "Delivered"].includes(data.status) ? "complete" : data.status === "Processing" ? "active" : ""}">
-        📦 Processing at Sorting Center
+      <div class="tracking-details">
+        <p><strong>Current Location:</strong> ${data.location}</p>
+        <p><strong>Last Updated:</strong> ${data.updated}</p>
+        <p>${data.message}</p>
       </div>
 
-      <div class="step ${["Out for Delivery", "Delivered"].includes(data.status) ? "complete" : data.status === "In Transit" ? "active" : ""}">
-        🚚 In Transit
-      </div>
-
-      <div class="step ${data.status === "Delivered" ? "complete" : data.status === "Out for Delivery" ? "active" : ""}">
-        📦 Out for Delivery
-      </div>
-
-      <div class="step ${data.status === "Delivered" ? "active" : ""}">
-        🏠 Delivered
-      </div>
-
-      <div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:10px;">
-        <strong>Current Location:</strong> ${data.location}<br><br>
-        <strong>Last Updated:</strong> ${data.updated}<br><br>
-        ${data.message}
-      </div>
-    `;
-  } else {
-    result.innerHTML = `
-      <p style="color:#c00000;"><strong>Tracking number not found.</strong></p>
-    `;
-  }
-}
+      ${deliveredSuccess}
+    </div>
+  `;
+  }       
