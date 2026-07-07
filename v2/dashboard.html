@@ -1,1 +1,67 @@
-Dashboard 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courier Fast Service - Admin Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="script.js"></script>
+</head>
+
+<body>
+
+<header class="topbar">
+<h2>Courier Fast Service</h2>
+<p>Admin Dashboard</p>
+</header>
+
+<div class="dashboard">
+
+<div class="card">
+<h3>Create Shipment</h3>
+
+<input type="text" id="trackingNumber" placeholder="Tracking Number">
+
+<input type="text" id="senderName" placeholder="Sender Name">
+
+<input type="text" id="receiverName" placeholder="Receiver Name">
+
+<input type="text" id="origin" placeholder="Origin Country">
+
+<input type="text" id="destination" placeholder="Destination Country">
+
+<select id="status">
+<option>Shipment Created</option>
+<option>Picked Up</option>
+<option>In Transit</option>
+<option>Customs Clearance</option>
+<option>Out For Delivery</option>
+<option>Delivered</option>
+<option>On Hold</option>
+</select>
+
+<button id="saveShipment">
+Save Shipment
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Live Shipments</h3>
+
+<div id="shipmentList">
+
+No shipment available.
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+  </html>
