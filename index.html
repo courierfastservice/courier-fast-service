@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courier Fast Service</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo">CFS</div>
+        <div>
+          <strong>Courier Fast Service</strong>
+          <span>Fast. Secure. Reliable.</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#track">Track</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-text">
+        <p class="badge">Worldwide Courier & Package Tracking</p>
+        <h1>Delivering your packages safely, quickly, and professionally.</h1>
+        <p>Courier Fast Service helps individuals and businesses ship documents, parcels, and international deliveries with confidence.</p>
+        <div class="hero-buttons">
+          <a href="#track" class="btn primary">Track Package</a>
+          <a href="#contact" class="btn secondary">Contact Us</a>
+        </div>
+      </div>
+
+      <div class="track-card" id="track">
+        <h2>Track Your Package</h2>
+        <p>Enter your tracking number below.</p>
+        <input id="trackingInput" type="text" placeholder="Example: CFS123456" />
+        <button onclick="trackPackage()">Track Now</button>
+        <div id="trackingResult" class="result"></div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="section" id="services">
+      <h2>Our Services</h2>
+      <div class="cards">
+        <div class="card"><h3>Express Delivery</h3><p>Fast local and international delivery for urgent packages.</p></div>
+        <div class="card"><h3>Parcel Shipping</h3><p>Reliable handling for personal and business parcels.</p></div>
+        <div class="card"><h3>International Shipping</h3><p>Worldwide courier support for cross-border shipments.</p></div>
+        <div class="card"><h3>Business Logistics</h3><p>Shipping support for businesses, stores, and suppliers.</p></div>
+      </div>
+    </section>
+
+    <section class="section about">
+      <h2>Why Choose Courier Fast Service?</h2>
+      <ul>
+        <li>Fast and reliable delivery support</li>
+        <li>Secure package handling</li>
+        <li>Real-time shipment status updates</li>
+        <li>Professional customer support</li>
+        <li>Affordable shipping solutions</li>
+      </ul>
+    </section>
+
+    <section class="section contact" id="contact">
+      <h2>Contact Us</h2>
+      <p><strong>Email:</strong> courierfastserviceglobal@gmail.com</p>
+      <p><strong>Phone:</strong> +1 (701) 472-0207</p>
+      <p><strong>Location:</strong> USA</p>
+      <a class="btn primary" href="mailto:courierfastserviceglobal@gmail.com">Send Email</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 Courier Fast Service. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
