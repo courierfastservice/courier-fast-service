@@ -41,15 +41,16 @@ function trackPackage() {
   <h3>Tracking Progress</h3>
 
   <div class="step complete">✓ Shipment Received</div>
-  <div class="step complete">✓ Processing at Sorting Center</div>
+<div class="step complete">✓ Processing at Sorting Center</div>
 
-  <div class="step active">
-    🚚 ${data.status}<br>
-    <small>${data.location}</small>
-  </div>
+<div class="step complete">✓ In Transit</div>
 
-  <div class="step">📦 Out for Delivery</div>
-  <div class="step">🏠 Delivered</div>
+<div class="step active">
+  🚚 ${data.status}<br>
+  <small>${data.location}</small>
+</div>
+
+<div class="step">🏠 Delivered</div>
 
   <div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:10px;">
     <strong>Current Location:</strong> ${data.location}<br><br>
