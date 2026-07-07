@@ -29,12 +29,25 @@ function trackPackage() {
     const data = trackingData[input];
 
     result.innerHTML = `
-      <h3>Tracking Result</h3>
-      <p><strong>Status:</strong> ${data.status}</p>
-      <p><strong>Current Location:</strong> ${data.location}</p>
-      <p><strong>Last Updated:</strong> ${data.updated}</p>
-      <p>${data.message}</p>
-    `;
+  <h3>Tracking Progress</h3>
+
+  <div class="step complete">✓ Shipment Received</div>
+  <div class="step complete">✓ Processing at Sorting Center</div>
+
+  <div class="step active">
+    🚚 ${data.status}<br>
+    <small>${data.location}</small>
+  </div>
+
+  <div class="step">📦 Out for Delivery</div>
+  <div class="step">🏠 Delivered</div>
+
+  <div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:10px;">
+    <strong>Current Location:</strong> ${data.location}<br><br>
+    <strong>Last Updated:</strong> ${data.updated}<br><br>
+    ${data.message}
+  </div>
+`;
   } else {
     result.innerHTML = `
       <p style="color:#c00000;"><strong>Tracking number not found.</strong></p>
