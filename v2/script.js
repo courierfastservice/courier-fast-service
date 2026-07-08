@@ -6,75 +6,81 @@ import {
   get,
   child,
   update,
-  remove,
-  onValue
+  remove
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
+function clean(value) {
+  return value ? value.trim() : "";
+}
+
 function cleanTrackingNumber(value) {
-  return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return clean(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function generateTrackingNumber() {
+  return "CFS" + Date.now().toString().slice(-8);
 }
 
 window.saveShipment = async function () {
-
-  const trackingNumber = cleanTrackingNumber(
-    document.getElementById("trackingNumber").value
-  );
-
-  const senderName = document.getElementById("senderName").value;
-
-  const receiverName = document.getElementById("receiverName").value;
-
-  const origin = document.getElementById("origin").value;
-
-  const destination = document.getElementById("destination").value;
-
-  const status = document.getElementById("status").value;
+  let trackingNumber = cleanTrackingNumber(document.getElementById("trackingNumber").value);
 
   if (!trackingNumber) {
-    alert("Tracking Number is required.");
-    return;
+    trackingNumber = generateTrackingNumber();
+    document.getElementById("trackingNumber").value = trackingNumber;
   }
 
   const shipment = {
-
     trackingNumber,
+    senderName: clean(document.getElementById("senderName").value),
+    senderPhone: clean(document.getElementById("senderPhone")?.value),
+    senderEmail: clean(document.getElementById("senderEmail")?.value),
+    senderAddress: clean(document.getElementById("senderAddress")?.value),
 
-    senderName,
+    receiverName: clean(document.getElementById("receiverName").value),
+    receiverPhone: clean(document.getElementById("receiverPhone")?.value),
+    receiverEmail: clean(document.getElementById("receiverEmail")?.value),
+    receiverAddress: clean(document.getElementById("receiverAddress")?.value),
 
-    receiverName,
-
-    origin,
-
-    destination,
-
-    status,
-
-    createdAt: new Date().toISOString(),
+    origin: clean(document.getElementById("origin").value),
+    destination: clean(document.getElementById("destination").value),
+    weight: clean(document.getElementById("weight")?.value),
+    description: clean(document.getElementById("description")?.value),
+    deliveryDate: clean(document.getElementById("deliveryDate")?.value),
+    status: clean(document.getElementById("status").value),
 
     updatedAt: new Date().toISOString()
-
   };
 
-  await set(
-
-    ref(database, "shipments/" + trackingNumber),
-
-    shipment
-
-  );
-
-  alert("Shipment saved successfully.");
-
-  loadShipments();
-
-};
-async function loadShipments() {
-
-  const shipmentList = document.getElementById("shipmentList");
-
-  if (!shipmentList) {
+  if (!shipment.senderName || !shipment.receiverName || !shipment.origin || !shipment.destination) {
+    alert("Sender name, receiver name, origin, and destination are required.");
     return;
   }
+
+  const oldData = await get(child(ref(database), "shipments/" + trackingNumber));
+
+  if (!oldData.exists()) {
+    shipment.createdAt = new Date().toISOString();
+    shipment.history = [
+      {
+        status: shipment.status,
+        message: "Shipment registered.",
+        date: new Date().toISOString()
+      }
+    ];
+  }
+
+  await set(ref(database, "shipments/" + trackingNumber), {
+    ...(oldData.exists() ? oldData.val() : {}),
+    ...shipment
+  });
+
+  alert("Shipment saved successfully.");
+  loadShipments();
+};
+
+async function loadShipments() {
+  const shipmentList = document.getElementById("shipmentList");
+  if (!shipmentList) return;
 
   const snapshot = await get(child(ref(database), "shipments"));
 
@@ -84,90 +90,78 @@ async function loadShipments() {
   }
 
   const shipments = snapshot.val();
-
   let html = "";
 
-  Object.keys(shipments).forEach(function (key) {
-
-    const shipment = shipments[key];
+  Object.keys(shipments).reverse().forEach((key) => {
+    const s = shipments[key];
 
     html += `
       <div class="shipment-box">
-        <h4>${shipment.trackingNumber}</h4>
-        <p><strong>Sender:</strong> ${shipment.senderName || "N/A"}</p>
-        <p><strong>Receiver:</strong> ${shipment.receiverName || "N/A"}</p>
-        <p><strong>From:</strong> ${shipment.origin || "N/A"}</p>
-        <p><strong>To:</strong> ${shipment.destination || "N/A"}</p>
-        <p><strong>Status:</strong> ${shipment.status || "N/A"}</p>
-        <button onclick="deleteShipment('${shipment.trackingNumber}')">Delete</button>
+        <h3>${s.trackingNumber}</h3>
+        <p><strong>Sender:</strong> ${s.senderName || "N/A"}</p>
+        <p><strong>Sender Phone:</strong> ${s.senderPhone || "Optional / Not added"}</p>
+        <p><strong>Sender Email:</strong> ${s.senderEmail || "Optional / Not added"}</p>
+
+        <p><strong>Receiver:</strong> ${s.receiverName || "N/A"}</p>
+        <p><strong>Receiver Phone:</strong> ${s.receiverPhone || "Optional / Not added"}</p>
+        <p><strong>Receiver Email:</strong> ${s.receiverEmail || "Optional / Not added"}</p>
+
+        <p><strong>From:</strong> ${s.origin || "N/A"}</p>
+        <p><strong>To:</strong> ${s.destination || "N/A"}</p>
+        <p><strong>Status:</strong> ${s.status || "N/A"}</p>
+
+        <button onclick="editShipment('${s.trackingNumber}')">Edit</button>
+        <button onclick="deleteShipment('${s.trackingNumber}')">Delete</button>
       </div>
     `;
-
   });
 
   shipmentList.innerHTML = html;
-
 }
 
-window.deleteShipment = async function (trackingNumber) {
-
-  const cleanNumber = cleanTrackingNumber(trackingNumber);
-
-  if (!confirm("Are you sure you want to delete this shipment?")) {
+window.editShipment = async function (trackingNumber) {
+  const snapshot = await get(child(ref(database), "shipments/" + trackingNumber));
+  if (!snapshot.exists()) {
+    alert("Shipment not found.");
     return;
   }
 
-  await remove(ref(database, "shipments/" + cleanNumber));
+  const s = snapshot.val();
 
+  document.getElementById("trackingNumber").value = s.trackingNumber || "";
+  document.getElementById("senderName").value = s.senderName || "";
+  document.getElementById("senderPhone").value = s.senderPhone || "";
+  document.getElementById("senderEmail").value = s.senderEmail || "";
+  document.getElementById("senderAddress").value = s.senderAddress || "";
+
+  document.getElementById("receiverName").value = s.receiverName || "";
+  document.getElementById("receiverPhone").value = s.receiverPhone || "";
+  document.getElementById("receiverEmail").value = s.receiverEmail || "";
+  document.getElementById("receiverAddress").value = s.receiverAddress || "";
+
+  document.getElementById("origin").value = s.origin || "";
+  document.getElementById("destination").value = s.destination || "";
+  document.getElementById("weight").value = s.weight || "";
+  document.getElementById("description").value = s.description || "";
+  document.getElementById("deliveryDate").value = s.deliveryDate || "";
+  document.getElementById("status").value = s.status || "";
+
+  alert("Shipment loaded for editing.");
+};
+
+window.deleteShipment = async function (trackingNumber) {
+  if (!confirm("Delete this shipment?")) return;
+
+  await remove(ref(database, "shipments/" + trackingNumber));
   alert("Shipment deleted successfully.");
-
-  loadShipments();
-
-};window.getShipment = async function (trackingNumber) {
-
-  const cleanNumber = cleanTrackingNumber(trackingNumber);
-
-  const snapshot = await get(
-    child(ref(database), "shipments/" + cleanNumber)
-  );
-
-  if (snapshot.exists()) {
-    return snapshot.val();
-  }
-
-  return null;
-};
-
-window.updateShipment = async function (trackingNumber, updatedData) {
-
-  const cleanNumber = cleanTrackingNumber(trackingNumber);
-
-  await update(
-    ref(database, "shipments/" + cleanNumber),
-    {
-      ...updatedData,
-      updatedAt: new Date().toISOString()
-    }
-  );
-
-  alert("Shipment updated successfully.");
-
   loadShipments();
 };
 
-// Automatically load shipments when dashboard opens
 document.addEventListener("DOMContentLoaded", () => {
-
-  if (document.getElementById("shipmentList")) {
-    loadShipments();
-  }
+  loadShipments();
 
   const saveButton = document.getElementById("saveShipment");
-
   if (saveButton) {
     saveButton.addEventListener("click", window.saveShipment);
   }
-
 });
-
-console.log("Courier Fast Service V2 connected successfully.");
