@@ -1,4 +1,4 @@
-import { database } from "./firebase-config.js";
+import { database, storage } from "./firebase-config.js";
 
 import {
   ref,
@@ -7,6 +7,12 @@ import {
   child,
   remove
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
 function clean(value) {
   return value ? value.trim() : "";
@@ -39,6 +45,21 @@ function createHistoryEntry(status, location, note) {
   };
 }
 
+async function uploadPackageFile(trackingNumber) {
+  const fileInput = document.getElementById("packagePhoto");
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    return "";
+  }
+
+  const file = fileInput.files[0];
+  const filePath = `shipments/${trackingNumber}/${Date.now()}-${file.name}`;
+  const fileReference = storageRef(storage, filePath);
+
+  await uploadBytes(fileReference, file);
+  return await getDownloadURL(fileReference);
+}
+
 window.saveShipment = async function () {
   let trackingNumber = cleanTrackingNumber(getValue("trackingNumber"));
 
@@ -51,8 +72,33 @@ window.saveShipment = async function () {
   const currentLocation = getValue("currentLocation");
   const updateNote = getValue("updateNote");
 
+  const shipmentRef = ref(database, "shipments/" + trackingNumber);
+  const snapshot = await get(child(ref(database), "shipments/" + trackingNumber));
+
+  let oldShipment = {};
+  let history = [];
+
+  if (snapshot.exists()) {
+    oldShipment = snapshot.val();
+    history = Array.isArray(oldShipment.history) ? oldShipment.history : [];
+  }
+
+  let packageFileUrl = oldShipment.packageFileUrl || "";
+
+  try {
+    const uploadedUrl = await uploadPackageFile(trackingNumber);
+    if (uploadedUrl) {
+      packageFileUrl = uploadedUrl;
+    }
+  } catch (error) {
+    alert("File upload failed. Please check Firebase Storage settings.");
+    console.error(error);
+    return;
+  }
+
   const shipment = {
     trackingNumber,
+
     senderName: getValue("senderName"),
     senderPhone: getValue("senderPhone"),
     senderEmail: getValue("senderEmail"),
@@ -71,6 +117,8 @@ window.saveShipment = async function () {
     weight: getValue("weight"),
     description: getValue("description"),
     deliveryDate: getValue("deliveryDate"),
+    packageFileUrl,
+
     status,
     updatedAt: new Date().toISOString()
   };
@@ -80,24 +128,15 @@ window.saveShipment = async function () {
     return;
   }
 
-  const shipmentRef = ref(database, "shipments/" + trackingNumber);
-  const snapshot = await get(child(ref(database), "shipments/" + trackingNumber));
-
-  let history = [];
-
-  if (snapshot.exists()) {
-    const oldShipment = snapshot.val();
-    history = Array.isArray(oldShipment.history) ? oldShipment.history : [];
-  } else {
+  if (!snapshot.exists()) {
     shipment.createdAt = new Date().toISOString();
   }
 
   history.push(createHistoryEntry(status, currentLocation, updateNote));
-
   shipment.history = history;
 
   await set(shipmentRef, {
-    ...(snapshot.exists() ? snapshot.val() : {}),
+    ...oldShipment,
     ...shipment
   });
 
@@ -138,6 +177,12 @@ window.loadShipments = async function () {
         <p><strong>To:</strong> ${s.destination || "N/A"}</p>
         <p><strong>Current Location:</strong> ${s.currentLocation || "N/A"}</p>
         <p><strong>Status:</strong> ${s.status || "N/A"}</p>
+
+        ${
+          s.packageFileUrl
+            ? `<p><strong>Package File:</strong> <a href="${s.packageFileUrl}" target="_blank">View File</a></p>`
+            : ""
+        }
 
         <div class="shipment-history">
           <strong>History:</strong>
