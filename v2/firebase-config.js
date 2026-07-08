@@ -1,8 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCnLTZJ2gj78xVy7GNxtljm69_3kI1qjd4",
+  apiKey: "AIzaSyCnLTZJ2gj78xVy7GNxt1jm69_3Kl1qjd4",
   authDomain: "courier-fast-service.firebaseapp.com",
   databaseURL: "https://courier-fast-service-default-rtdb.firebaseio.com",
   projectId: "courier-fast-service",
@@ -14,5 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const storage = getStorage(app);
 
-export { app, database };
+export { app, database, storage };
