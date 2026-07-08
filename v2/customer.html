@@ -1,89 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customers | Courier Fast Service</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Track Shipment - Courier Fast Service</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="tracking.js"></script>
+
 </head>
+
 <body>
 
-  <main class="admin-page">
-    <section class="admin-card">
-      <h1>Courier Fast Service</h1>
-      <h2>Customer Registration</h2>
-      <p>Create sender or receiver customer records.</p>
+<header class="topbar">
+<h2>Courier Fast Service</h2>
+<p>Track Your Shipment</p>
+</header>
 
-      <form id="customerForm">
-        <label>Customer Type</label>
-        <select id="customerType">
-          <option value="Sender">Sender</option>
-          <option value="Receiver">Receiver</option>
-        </select>
+<div class="dashboard">
 
-        <label>Full Name *</label>
-        <input id="customerName" type="text" placeholder="Enter full name" required />
+<div class="card">
 
-        <label>Country *</label>
-        <input id="customerCountry" type="text" placeholder="Enter country" required />
+<h3>Track Shipment</h3>
 
-        <label>Phone Number</label>
-        <input id="customerPhone" type="text" placeholder="Optional" />
+<input
+type="text"
+id="trackingInput"
+placeholder="Enter Tracking Number">
 
-        <label>Email</label>
-        <input id="customerEmail" type="email" placeholder="Optional" />
+<button id="trackShipment">
+Track Package
+</button>
 
-        <label>City</label>
-        <input id="customerCity" type="text" placeholder="Optional" />
+</div>
 
-        <label>Postal Code</label>
-        <input id="customerPostalCode" type="text" placeholder="Optional" />
+<div class="card">
 
-        <button type="submit">Save Customer</button>
-      </form>
+<div id="trackingResult">
 
-      <div id="customerResult"></div>
+Enter your tracking number above.
 
-      <p style="margin-top:20px;">
-        <a href="dashboard.html">Back to Dashboard</a>
-      </p>
-    </section>
-  </main>
+</div>
 
-  <script type="module">
-    import { database } from "./firebase-config.js";
-    import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+</div>
 
-    const customerForm = document.getElementById("customerForm");
-    const customerResult = document.getElementById("customerResult");
-
-    customerForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      const customerData = {
-        type: document.getElementById("customerType").value,
-        name: document.getElementById("customerName").value.trim(),
-        country: document.getElementById("customerCountry").value.trim(),
-        phone: document.getElementById("customerPhone").value.trim(),
-        email: document.getElementById("customerEmail").value.trim(),
-        city: document.getElementById("customerCity").value.trim(),
-        postalCode: document.getElementById("customerPostalCode").value.trim(),
-        createdAt: new Date().toISOString()
-      };
-
-      if (!customerData.name || !customerData.country) {
-        customerResult.innerHTML = "<p style='color:red;'>Name and country are required.</p>";
-        return;
-      }
-
-      const newCustomerRef = push(ref(database, "customers"));
-
-      await set(newCustomerRef, customerData);
-
-      customerResult.innerHTML = "<p style='color:green;'><strong>Customer saved successfully.</strong></p>";
-      customerForm.reset();
-    });
-  </script>
+</div>
 
 </body>
 </html>
