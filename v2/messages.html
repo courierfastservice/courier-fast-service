@@ -1,1 +1,995 @@
-Messages
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Customer Messages - Courier Fast Service</title>
+
+  <script>
+    if (
+      sessionStorage.getItem("cfsAdminLoggedIn") !== "true"
+    ) {
+      window.location.replace("login.html");
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      background: #f4f7fb;
+    }
+
+    .messages-page {
+      width: min(100%, 1000px);
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(
+        135deg,
+        #0b4f9c,
+        #0b63ce
+      );
+      color: white;
+      padding: 22px;
+      border-radius: 0 0 16px 16px;
+      margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+      margin: 0 0 5px;
+      font-size: 28px;
+    }
+
+    .page-header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-buttons button {
+      width: auto;
+      margin: 0;
+      padding: 11px 16px;
+    }
+
+    .back-button {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .logout-button {
+      background: #c62828;
+    }
+
+    .message-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .message-card h2,
+    .message-card h3 {
+      margin-top: 0;
+      color: #172033;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .search-row input {
+      margin: 0;
+    }
+
+    .search-row button {
+      width: auto;
+      margin: 0;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    .shipment-summary {
+      background: #eef5ff;
+      border: 1px solid #cfe0f7;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 18px;
+    }
+
+    .shipment-summary h3 {
+      color: #0b4f9c;
+      margin-bottom: 14px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+      );
+      gap: 12px;
+    }
+
+    .summary-item {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid #dbe5f2;
+    }
+
+    .summary-label {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      color: #172033;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .message-form {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .message-form.visible {
+      display: block;
+    }
+
+    .message-form label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .message-form textarea {
+      min-height: 130px;
+    }
+
+    .template-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .template-buttons button {
+      width: auto;
+      margin: 0;
+      padding: 9px 12px;
+      background: #e8f1ff;
+      color: #0b4f9c;
+      border: 1px solid #c8dcf5;
+      font-size: 14px;
+    }
+
+    .template-buttons button:hover {
+      background: #dceaff;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-actions button {
+      flex: 1;
+    }
+
+    .clear-button {
+      background: #64748b;
+    }
+
+    .status-message {
+      margin-top: 14px;
+      font-weight: 700;
+    }
+
+    .status-success {
+      color: #047857;
+    }
+
+    .status-error {
+      color: #b91c1c;
+    }
+
+    .messages-list {
+      margin-top: 18px;
+    }
+
+    .customer-message {
+      position: relative;
+      border: 1px solid #dbe2ea;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+    }
+
+    .customer-message.unread {
+      border-left: 5px solid #0b63ce;
+      background: #f7fbff;
+    }
+
+    .message-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .message-title {
+      font-weight: 700;
+      color: #0b4f9c;
+    }
+
+    .message-date {
+      color: #64748b;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .message-text {
+      margin: 0;
+      line-height: 1.6;
+      color: #263244;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message-meta {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e9ef;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .message-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .message-buttons button {
+      width: auto;
+      margin: 0;
+      padding: 9px 13px;
+      font-size: 14px;
+    }
+
+    .read-button {
+      background: #047857;
+    }
+
+    .delete-button {
+      background: #c62828;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 15px;
+      color: #64748b;
+    }
+
+    @media (max-width: 650px) {
+      .messages-page {
+        padding: 10px;
+      }
+
+      .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-buttons {
+        width: 100%;
+      }
+
+      .header-buttons button {
+        flex: 1;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .search-row button {
+        width: 100%;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .message-actions {
+        flex-direction: column;
+      }
+
+      .message-top {
+        flex-direction: column;
+      }
+
+      .message-date {
+        text-align: left;
+      }
+
+      .message-buttons {
+        flex-direction: column;
+      }
+
+      .message-buttons button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="page-header">
+    <div>
+      <h1>Customer Messages</h1>
+      <p>
+        Send shipment updates to customers
+      </p>
+    </div>
+
+    <div class="header-buttons">
+      <button
+        type="button"
+        id="backButton"
+        class="back-button"
+      >
+        Dashboard
+      </button>
+
+      <button
+        type="button"
+        id="logoutButton"
+        class="logout-button"
+      >
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="messages-page">
+
+    <section class="message-card">
+      <h2>Find Shipment</h2>
+
+      <div class="search-row">
+        <input
+          type="text"
+          id="trackingInput"
+          placeholder="Enter tracking number"
+          autocomplete="off"
+        />
+
+        <button
+          type="button"
+          id="searchButton"
+        >
+          Search
+        </button>
+      </div>
+
+      <div
+        id="searchStatus"
+        class="status-message"
+      ></div>
+
+      <div id="shipmentSummary"></div>
+    </section>
+
+    <section
+      id="messageForm"
+      class="message-card message-form"
+    >
+      <h2>Send Customer Update</h2>
+
+      <label>Quick message templates</label>
+
+      <div class="template-buttons">
+        <button
+          type="button"
+          data-message="Your shipment has been registered and is being prepared for processing."
+        >
+          Shipment registered
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment has been picked up from the sender and is moving to the sorting center."
+        >
+          Picked up
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment has arrived at the sorting center and is being processed."
+        >
+          Sorting center
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment is currently in transit to the destination country."
+        >
+          In transit
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment is currently undergoing customs clearance."
+        >
+          Customs clearance
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment has been released by customs and will continue to its destination."
+        >
+          Customs released
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment has arrived in the destination country."
+        >
+          Destination country
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment is out for delivery. Please ensure someone is available to receive it."
+        >
+          Out for delivery
+        </button>
+
+        <button
+          type="button"
+          data-message="Your shipment has been delivered successfully. Thank you for choosing Courier Fast Service."
+        >
+          Delivered
+        </button>
+
+        <button
+          type="button"
+          data-message="Delivery was attempted but could not be completed. Please contact Courier Fast Service for assistance."
+        >
+          Delivery attempted
+        </button>
+      </div>
+
+      <label for="messageSubject">
+        Message title
+      </label>
+
+      <input
+        type="text"
+        id="messageSubject"
+        placeholder="Example: Shipment Update"
+      />
+
+      <label for="messageText">
+        Customer message
+      </label>
+
+      <textarea
+        id="messageText"
+        placeholder="Write the shipment update here..."
+      ></textarea>
+
+      <div class="message-actions">
+        <button
+          type="button"
+          id="sendMessageButton"
+        >
+          Send Message
+        </button>
+
+        <button
+          type="button"
+          id="clearMessageButton"
+          class="clear-button"
+        >
+          Clear Message
+        </button>
+      </div>
+
+      <div
+        id="sendStatus"
+        class="status-message"
+      ></div>
+    </section>
+
+    <section
+      id="messagesSection"
+      class="message-card message-form"
+    >
+      <h2>Message History</h2>
+
+      <div id="messagesList">
+        <div class="empty-state">
+          Search for a shipment to view its messages.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { database } from "./firebase-config.js";
+
+    import {
+      ref,
+      get,
+      set,
+      child
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    let currentTrackingNumber = "";
+    let currentShipment = null;
+
+    function clean(value) {
+      return String(value || "").trim();
+    }
+
+    function cleanTrackingNumber(value) {
+      return clean(value)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "Date unavailable";
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return String(value);
+      }
+
+      return date.toLocaleString();
+    }
+
+    function setStatus(elementId, message, type) {
+      const element =
+        document.getElementById(elementId);
+
+      if (!element) {
+        return;
+      }
+
+      element.textContent = message || "";
+      element.className = "status-message";
+
+      if (type === "success") {
+        element.classList.add("status-success");
+      }
+
+      if (type === "error") {
+        element.classList.add("status-error");
+      }
+    }
+
+    function buildShipmentSummary(shipment) {
+      return `
+        <div class="shipment-summary">
+          <h3>
+            Shipment ${escapeHtml(
+              shipment.trackingNumber ||
+              currentTrackingNumber
+            )}
+          </h3>
+
+          <div class="summary-grid">
+
+            <div class="summary-item">
+              <span class="summary-label">
+                Receiver
+              </span>
+
+              <span class="summary-value">
+                ${escapeHtml(
+                  shipment.receiverName ||
+                  "Not added"
+                )}
+              </span>
+            </div>
+
+            <div class="summary-item">
+              <span class="summary-label">
+                Current status
+              </span>
+
+              <span class="summary-value">
+                ${escapeHtml(
+                  shipment.status ||
+                  "Shipment Created"
+                )}
+              </span>
+            </div>
+
+            <div class="summary-item">
+              <span class="summary-label">
+                Current location
+              </span>
+
+              <span class="summary-value">
+                ${escapeHtml(
+                  shipment.currentLocation ||
+                  "Not added"
+                )}
+              </span>
+            </div>
+
+            <div class="summary-item">
+              <span class="summary-label">
+                Destination
+              </span>
+
+              <span class="summary-value">
+                ${escapeHtml(
+                  shipment.destination ||
+                  "Not added"
+                )}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      `;
+    }
+
+    function buildMessages(messages) {
+      if (
+        !Array.isArray(messages) ||
+        messages.length === 0
+      ) {
+        return `
+          <div class="empty-state">
+            No customer messages have been sent yet.
+          </div>
+        `;
+      }
+
+      return messages
+        .map((message, index) => {
+          const unreadClass =
+            message.read === false
+              ? "unread"
+              : "";
+
+          const readButton =
+            message.read === false
+              ? `
+                <button
+                  type="button"
+                  class="read-button"
+                  onclick="markMessageRead(${index})"
+                >
+                  Mark as Read
+                </button>
+              `
+              : "";
+
+          return `
+            <article
+              class="customer-message ${unreadClass}"
+            >
+              <div class="message-top">
+                <div class="message-title">
+                  ${escapeHtml(
+                    message.subject ||
+                    "Shipment Update"
+                  )}
+                </div>
+
+                <div class="message-date">
+                  ${escapeHtml(
+                    formatDate(message.date)
+                  )}
+                </div>
+              </div>
+
+              <p class="message-text">
+                ${escapeHtml(message.text || "")}
+              </p>
+
+              <div class="message-meta">
+                Status when sent:
+                <strong>
+                  ${escapeHtml(
+                    message.shipmentStatus ||
+                    "Not available"
+                  )}
+                </strong>
+              </div>
+
+              <div class="message-buttons">
+                ${readButton}
+
+                <button
+                  type="button"
+                  class="delete-button"
+                  onclick="deleteCustomerMessage(${index})"
+                >
+                  Delete Message
+                </button>
+              </div>
+            </article>
+          `;
+        })
+        .reverse()
+        .join("");
+    }
+
+    function displayMessages() {
+      const messagesList =
+        document.getElementById("messagesList");
+
+      if (!messagesList) {
+        return;
+      }
+
+      messagesList.innerHTML =
+        buildMessages(
+          currentShipment?.messages || []
+        );
+    }
+
+    async function searchShipment() {
+      const input =
+        document.getElementById("trackingInput");
+
+      const trackingNumber =
+        cleanTrackingNumber(input?.value);
+
+      setStatus("searchStatus", "", "");
+
+      document.getElementById(
+        "shipmentSummary"
+      ).innerHTML = "";
+
+      document
+        .getElementById("messageForm")
+        .classList.remove("visible");
+
+      document
+        .getElementById("messagesSection")
+        .classList.remove("visible");
+
+      if (!trackingNumber) {
+        setStatus(
+          "searchStatus",
+          "Please enter a tracking number.",
+          "error"
+        );
+
+        return;
+      }
+
+      setStatus(
+        "searchStatus",
+        "Searching shipment...",
+        ""
+      );
+
+      let snapshot;
+
+      try {
+        snapshot = await get(
+          child(
+            ref(database),
+            "shipments/" + trackingNumber
+          )
+        );
+      } catch (error) {
+        console.error(error);
+
+        setStatus(
+          "searchStatus",
+          "Unable to connect to the database.",
+          "error"
+        );
+
+        return;
+      }
+
+      if (!snapshot.exists()) {
+        setStatus(
+          "searchStatus",
+          "Shipment not found.",
+          "error"
+        );
+
+        return;
+      }
+
+      currentTrackingNumber = trackingNumber;
+      currentShipment = snapshot.val();
+
+      document.getElementById(
+        "shipmentSummary"
+      ).innerHTML =
+        buildShipmentSummary(currentShipment);
+
+      document
+        .getElementById("messageForm")
+        .classList.add("visible");
+
+      document
+        .getElementById("messagesSection")
+        .classList.add("visible");
+
+      displayMessages();
+
+      setStatus(
+        "searchStatus",
+        "Shipment found.",
+        "success"
+      );
+    }
+
+    async function sendCustomerMessage() {
+      if (
+        !currentTrackingNumber ||
+        !currentShipment
+      ) {
+        setStatus(
+          "sendStatus",
+          "Please search for a shipment first.",
+          "error"
+        );
+
+        return;
+      }
+
+      const subject = clean(
+        document.getElementById(
+          "messageSubject"
+        )?.value
+      );
+
+      const text = clean(
+        document.getElementById(
+          "messageText"
+        )?.value
+      );
+
+      if (!text) {
+        setStatus(
+          "sendStatus",
+          "Please enter a customer message.",
+          "error"
+        );
+
+        return;
+      }
+
+      const oldMessages =
+        Array.isArray(currentShipment.messages)
+          ? currentShipment.messages
+          : [];
+
+      const newMessage = {
+        subject: subject || "Shipment Update",
+        text,
+        date: new Date().toISOString(),
+        shipmentStatus:
+          currentShipment.status ||
+          "Shipment Created",
+        read: false
+      };
+
+      const updatedMessages = [
+        ...oldMessages,
+        newMessage
+      ];
+
+      setStatus(
+        "sendStatus",
+        "Sending message...",
+        ""
+      );
+
+      try {
+        await set(
+          ref(
+            database,
+            "shipments/" +
+              currentTrackingNumber +
+              "/messages"
+          ),
+          updatedMessages
+        );
+      } catch (error) {
+        console.error(error);
+
+        setStatus(
+          "sendStatus",
+          "The message could not be saved.",
+          "error"
+        );
+
+        return;
+      }
+
+      currentShipment.messages =
+        updatedMessages;
+
+      document.getElementById(
+        "messageSubject"
+      ).value = "";
+
+      document.getElementById(
+        "messageText"
+      ).value = "";
+
+      displayMessages();
+
+      setStatus(
+        "sendStatus",
+        "Customer message sent successfully.",
+        "success"
+      );
+    }
+
+    window.markMessageRead =
+      async function (index) {
+        const messages =
+          Array.isArray(currentShipment?.messages)
+            ? [...currentShipment.messages]
+            : [];
+
+        if (!messages[index]) {
+          return;
+        }
+
+        messages[index] = {
+          ...messages[index],
+          read: true
+        };
+
+        try {
+          await set(
+     
