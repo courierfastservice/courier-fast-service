@@ -1,1 +1,115 @@
-login 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Courier Fast Service - Admin Login</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="topbar">
+    <h2>Courier Fast Service</h2>
+    <p>Administrator Login</p>
+  </header>
+
+  <main class="dashboard">
+
+    <section class="card" style="max-width:500px;margin:auto;">
+
+      <h3>Admin Login</h3>
+
+      <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        autocomplete="username"
+      />
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      />
+
+      <button
+        type="button"
+        id="loginButton"
+      >
+        Login
+      </button>
+
+      <p
+        id="loginMessage"
+        style="
+          margin-top:15px;
+          color:#c00000;
+          font-weight:bold;
+        "
+      ></p>
+
+    </section>
+
+  </main>
+
+  <script>
+
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "CFS2026@";
+
+    const loginButton =
+      document.getElementById("loginButton");
+
+    loginButton.addEventListener("click", () => {
+
+      const username =
+        document.getElementById("username").value.trim();
+
+      const password =
+        document.getElementById("password").value;
+
+      const message =
+        document.getElementById("loginMessage");
+
+      if (
+        username === ADMIN_USERNAME &&
+        password === ADMIN_PASSWORD
+      ) {
+
+        sessionStorage.setItem(
+          "cfsAdminLoggedIn",
+          "true"
+        );
+
+        window.location.href = "dashboard.html";
+
+      } else {
+
+        message.textContent =
+          "Incorrect username or password.";
+
+      }
+
+    });
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+
+        if(event.key === "Enter"){
+
+          loginButton.click();
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+        </html>
