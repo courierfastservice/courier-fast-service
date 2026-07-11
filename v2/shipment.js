@@ -224,14 +224,17 @@ function buildShipmentCard(shipment, key) {
   Delete
 </button>
     </div>
-  `;
-}
-
-function displayShipments(shipments) {
+  `;function displayShipments(shipments) {
   const shipmentList =
     document.getElementById("shipmentList");
 
-  const shipmentValues = Object.values(shipments || {});
+  if (!shipmentList) {
+    return;
+  }
+
+  const safeShipments = shipments || {};
+  const keys = Object.keys(safeShipments);
+  const shipmentValues = Object.values(safeShipments);
 
   const totalShipments = shipmentValues.length;
 
@@ -283,24 +286,36 @@ function displayShipments(shipments) {
   }
 
   if (deliveryElement) {
-    deliveryElement.textContent = outForDeliveryCount;
+    deliveryElement.textContent =
+      outForDeliveryCount;
   }
 
   if (deliveredElement) {
-    deliveredElement.textContent = deliveredCount;
+    deliveredElement.textContent =
+      deliveredCount;
   }
 
   if (pendingElement) {
     pendingElement.textContent = pendingCount;
-    }
+  }
+
+  if (keys.length === 0) {
+    shipmentList.innerHTML =
+      "<p>No shipments available.</p>";
+    return;
+  }
 
   shipmentList.innerHTML = keys
+    .slice()
     .reverse()
     .map((key) =>
-      buildShipmentCard(shipments[key], key)
+      buildShipmentCard(safeShipments[key], key)
     )
     .join("");
+  }
 }
+
+
 
 window.saveShipment = async function () {
   let trackingNumber = cleanTrackingNumber(
