@@ -8,8 +8,10 @@ import {
   remove
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
+let allShipments = {};
+
 function clean(value) {
-  return value ? value.trim() : "";
+  return value ? String(value).trim() : "";
 }
 
 function cleanTrackingNumber(value) {
@@ -35,6 +37,15 @@ function setValue(id, value) {
   }
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function createHistoryEntry(status, location, note) {
   return {
     status: status || "Shipment Created",
@@ -42,6 +53,195 @@ function createHistoryEntry(status, location, note) {
     note: note || "Shipment update saved.",
     date: new Date().toISOString()
   };
+}
+
+function clearForm() {
+  const fieldIds = [
+    "trackingNumber",
+    "senderName",
+    "senderPhone",
+    "senderEmail",
+    "senderAddress",
+    "receiverName",
+    "receiverPhone",
+    "receiverEmail",
+    "receiverAddress",
+    "origin",
+    "destination",
+    "currentLocation",
+    "updateNote",
+    "weight",
+    "description",
+    "deliveryDate"
+  ];
+
+  fieldIds.forEach((id) => {
+    setValue(id, "");
+  });
+
+  setValue("status", "Shipment Created");
+
+  const fileInput = document.getElementById("packagePhoto");
+
+  if (fileInput) {
+    fileInput.value = "";
+  }
+}
+
+function buildHistoryHtml(history) {
+  if (!Array.isArray(history) || history.length === 0) {
+    return "<p>No tracking history available.</p>";
+  }
+
+  return history
+    .slice()
+    .reverse()
+    .map((item) => {
+      const dateText = item.date
+        ? new Date(item.date).toLocaleString()
+        : "";
+
+      return `
+        <div class="history-item">
+          <strong>${escapeHtml(item.status || "Update")}</strong><br>
+          <span>${escapeHtml(item.location || "Location not added")}</span><br>
+          <span>${escapeHtml(item.note || "")}</span><br>
+          <small>${escapeHtml(dateText)}</small>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function buildShipmentCard(shipment, key) {
+  const trackingNumber =
+    shipment.trackingNumber || key;
+
+  const selectedFileHtml = shipment.packageFileName
+    ? `
+      <p>
+        <strong>Selected File:</strong>
+        ${escapeHtml(shipment.packageFileName)}
+      </p>
+      <small>File upload is not active yet.</small>
+    `
+    : "";
+
+  return `
+    <div class="shipment-box">
+      <h3>${escapeHtml(trackingNumber)}</h3>
+
+      <p>
+        <strong>Sender:</strong>
+        ${escapeHtml(shipment.senderName || "N/A")}
+      </p>
+
+      <p>
+        <strong>Sender Phone:</strong>
+        ${escapeHtml(shipment.senderPhone || "Optional / Not added")}
+      </p>
+
+      <p>
+        <strong>Sender Email:</strong>
+        ${escapeHtml(shipment.senderEmail || "Optional / Not added")}
+      </p>
+
+      <p>
+        <strong>Receiver:</strong>
+        ${escapeHtml(shipment.receiverName || "N/A")}
+      </p>
+
+      <p>
+        <strong>Receiver Phone:</strong>
+        ${escapeHtml(shipment.receiverPhone || "Optional / Not added")}
+      </p>
+
+      <p>
+        <strong>Receiver Email:</strong>
+        ${escapeHtml(shipment.receiverEmail || "Optional / Not added")}
+      </p>
+
+      <p>
+        <strong>From:</strong>
+        ${escapeHtml(shipment.origin || "N/A")}
+      </p>
+
+      <p>
+        <strong>To:</strong>
+        ${escapeHtml(shipment.destination || "N/A")}
+      </p>
+
+      <p>
+        <strong>Current Location:</strong>
+        ${escapeHtml(shipment.currentLocation || "N/A")}
+      </p>
+
+      <p>
+        <strong>Status:</strong>
+        ${escapeHtml(shipment.status || "N/A")}
+      </p>
+
+      <p>
+        <strong>Weight:</strong>
+        ${escapeHtml(shipment.weight || "Not added")}
+      </p>
+
+      <p>
+        <strong>Description:</strong>
+        ${escapeHtml(shipment.description || "Not added")}
+      </p>
+
+      <p>
+        <strong>Expected Delivery:</strong>
+        ${escapeHtml(shipment.deliveryDate || "Not added")}
+      </p>
+
+      ${selectedFileHtml}
+
+      <div class="shipment-history">
+        <strong>History:</strong>
+        ${buildHistoryHtml(shipment.history)}
+      </div>
+
+      <button
+        type="button"
+        onclick="editShipment('${escapeHtml(trackingNumber)}')"
+      >
+        Edit
+      </button>
+
+      <button
+        type="button"
+        onclick="deleteShipment('${escapeHtml(trackingNumber)}')"
+      >
+        Delete
+      </button>
+    </div>
+  `;
+}
+
+function displayShipments(shipments) {
+  const shipmentList =
+    document.getElementById("shipmentList");
+
+  if (!shipmentList) {
+    return;
+  }
+
+  const keys = Object.keys(shipments || {});
+
+  if (keys.length === 0) {
+    shipmentList.innerHTML =
+      "No shipment available.";
+    return;
+  }
+
+  shipmentList.innerHTML = keys
+    .reverse()
+    .map((key) =>
+      buildShipmentCard(shipments[key], key)
+    )
+    .join("");
 }
 
 window.saveShipment = async function () {
@@ -102,7 +302,9 @@ window.saveShipment = async function () {
     ? snapshot.val()
     : {};
 
-  const oldHistory = Array.isArray(oldShipment.history)
+  const oldHistory = Array.isArray(
+    oldShipment.history
+  )
     ? oldShipment.history
     : [];
 
@@ -142,7 +344,6 @@ window.saveShipment = async function () {
 
     origin,
     destination,
-
     currentLocation,
     updateNote,
 
@@ -179,18 +380,17 @@ window.saveShipment = async function () {
 
   alert("Shipment saved successfully.");
 
-  if (fileInput) {
-    fileInput.value = "";
-  }
-
-  loadShipments();
+  clearForm();
+  await loadShipments();
 };
 
 window.loadShipments = async function () {
   const shipmentList =
     document.getElementById("shipmentList");
 
-  if (!shipmentList) return;
+  if (!shipmentList) {
+    return;
+  }
 
   shipmentList.innerHTML =
     "Loading shipments...";
@@ -209,155 +409,82 @@ window.loadShipments = async function () {
     return;
   }
 
-  if (!snapshot.exists()) {
-    shipmentList.innerHTML =
-      "No shipment available.";
+  allShipments = snapshot.exists()
+    ? snapshot.val()
+    : {};
+
+  displayShipments(allShipments);
+};
+
+window.searchShipment = function () {
+  const searchInput =
+    document.getElementById(
+      "searchTrackingNumber"
+    );
+
+  const searchMessage =
+    document.getElementById("searchMessage");
+
+  const trackingNumber =
+    cleanTrackingNumber(searchInput?.value);
+
+  if (!trackingNumber) {
+    if (searchMessage) {
+      searchMessage.innerHTML =
+        "<p>Please enter a tracking number.</p>";
+    }
+
     return;
   }
 
-  const shipments = snapshot.val();
-  let html = "";
+  const shipment =
+    allShipments[trackingNumber];
 
-  Object.keys(shipments)
-    .reverse()
-    .forEach((key) => {
-      const shipment = shipments[key];
+  if (!shipment) {
+    displayShipments({});
 
-      const history = Array.isArray(
-        shipment.history
-      )
-        ? shipment.history
-        : [];
-
-      const historyHtml = history
-        .map((item) => {
-          const dateText = item.date
-            ? new Date(
-                item.date
-              ).toLocaleString()
-            : "";
-
-          return `
-            <div class="history-item">
-              <strong>${item.status || "Update"}</strong><br>
-              <span>${item.location || "Location not added"}</span><br>
-              <span>${item.note || ""}</span><br>
-              <small>${dateText}</small>
-            </div>
-          `;
-        })
-        .join("");
-
-      const selectedFileHtml =
-        shipment.packageFileName
-          ? `
-            <p>
-              <strong>Selected file:</strong>
-              ${shipment.packageFileName}
-            </p>
-            <small>
-              File upload is not active yet.
-            </small>
-          `
-          : "";
-
-      html += `
-        <div class="shipment-box">
-          <h3>${shipment.trackingNumber || key}</h3>
-
-          <p>
-            <strong>Sender:</strong>
-            ${shipment.senderName || "N/A"}
-          </p>
-
-          <p>
-            <strong>Sender Phone:</strong>
-            ${shipment.senderPhone || "Optional / Not added"}
-          </p>
-
-          <p>
-            <strong>Sender Email:</strong>
-            ${shipment.senderEmail || "Optional / Not added"}
-          </p>
-
-          <p>
-            <strong>Receiver:</strong>
-            ${shipment.receiverName || "N/A"}
-          </p>
-
-          <p>
-            <strong>Receiver Phone:</strong>
-            ${shipment.receiverPhone || "Optional / Not added"}
-          </p>
-
-          <p>
-            <strong>Receiver Email:</strong>
-            ${shipment.receiverEmail || "Optional / Not added"}
-          </p>
-
-          <p>
-            <strong>From:</strong>
-            ${shipment.origin || "N/A"}
-          </p>
-
-          <p>
-            <strong>To:</strong>
-            ${shipment.destination || "N/A"}
-          </p>
-
-          <p>
-            <strong>Current Location:</strong>
-            ${shipment.currentLocation || "N/A"}
-          </p>
-
-          <p>
-            <strong>Status:</strong>
-            ${shipment.status || "N/A"}
-          </p>
-
-          <p>
-            <strong>Weight:</strong>
-            ${shipment.weight || "Not added"}
-          </p>
-
-          <p>
-            <strong>Description:</strong>
-            ${shipment.description || "Not added"}
-          </p>
-
-          <p>
-            <strong>Expected Delivery:</strong>
-            ${shipment.deliveryDate || "Not added"}
-          </p>
-
-          ${selectedFileHtml}
-
-          <div class="shipment-history">
-            <strong>History:</strong>
-            ${
-              historyHtml ||
-              "<p>No tracking history available.</p>"
-            }
-          </div>
-
-          <button
-            type="button"
-            onclick="editShipment('${shipment.trackingNumber || key}')"
-          >
-            Edit
-          </button>
-
-          <button
-            type="button"
-            onclick="deleteShipment('${shipment.trackingNumber || key}')"
-          >
-            Delete
-          </button>
-        </div>
+    if (searchMessage) {
+      searchMessage.innerHTML = `
+        <p style="color:#c00000;">
+          <strong>No shipment found for ${escapeHtml(trackingNumber)}.</strong>
+        </p>
       `;
-    });
+    }
 
-  shipmentList.innerHTML = html;
+    return;
+  }
+
+  displayShipments({
+    [trackingNumber]: shipment
+  });
+
+  if (searchMessage) {
+    searchMessage.innerHTML = `
+      <p style="color:green;">
+        <strong>Shipment found.</strong>
+      </p>
+    `;
+  }
+};
+
+window.clearShipmentSearch = function () {
+  const searchInput =
+    document.getElementById(
+      "searchTrackingNumber"
+    );
+
+  const searchMessage =
+    document.getElementById("searchMessage");
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  if (searchMessage) {
+    searchMessage.innerHTML = "";
+  }
+
+  displayShipments(allShipments);
 };
 
 window.editShipment = async function (
@@ -386,26 +513,76 @@ window.editShipment = async function (
 
   const shipment = snapshot.val();
 
-  setValue("trackingNumber", shipment.trackingNumber);
+  setValue(
+    "trackingNumber",
+    shipment.trackingNumber
+  );
 
-  setValue("senderName", shipment.senderName);
-  setValue("senderPhone", shipment.senderPhone);
-  setValue("senderEmail", shipment.senderEmail);
-  setValue("senderAddress", shipment.senderAddress);
+  setValue(
+    "senderName",
+    shipment.senderName
+  );
 
-  setValue("receiverName", shipment.receiverName);
-  setValue("receiverPhone", shipment.receiverPhone);
-  setValue("receiverEmail", shipment.receiverEmail);
-  setValue("receiverAddress", shipment.receiverAddress);
+  setValue(
+    "senderPhone",
+    shipment.senderPhone
+  );
+
+  setValue(
+    "senderEmail",
+    shipment.senderEmail
+  );
+
+  setValue(
+    "senderAddress",
+    shipment.senderAddress
+  );
+
+  setValue(
+    "receiverName",
+    shipment.receiverName
+  );
+
+  setValue(
+    "receiverPhone",
+    shipment.receiverPhone
+  );
+
+  setValue(
+    "receiverEmail",
+    shipment.receiverEmail
+  );
+
+  setValue(
+    "receiverAddress",
+    shipment.receiverAddress
+  );
 
   setValue("origin", shipment.origin);
-  setValue("destination", shipment.destination);
-  setValue("currentLocation", shipment.currentLocation);
+  setValue(
+    "destination",
+    shipment.destination
+  );
+
+  setValue(
+    "currentLocation",
+    shipment.currentLocation
+  );
+
   setValue("updateNote", "");
 
   setValue("weight", shipment.weight);
-  setValue("description", shipment.description);
-  setValue("deliveryDate", shipment.deliveryDate);
+
+  setValue(
+    "description",
+    shipment.description
+  );
+
+  setValue(
+    "deliveryDate",
+    shipment.deliveryDate
+  );
+
   setValue("status", shipment.status);
 
   window.scrollTo({
@@ -423,7 +600,9 @@ window.deleteShipment = async function (
     "Are you sure you want to delete this shipment?"
   );
 
-  if (!confirmed) return;
+  if (!confirmed) {
+    return;
+  }
 
   try {
     await remove(
@@ -440,7 +619,9 @@ window.deleteShipment = async function (
   }
 
   alert("Shipment deleted successfully.");
-  loadShipments();
+
+  clearForm();
+  await loadShipments();
 };
 
 document.addEventListener(
@@ -449,12 +630,54 @@ document.addEventListener(
     loadShipments();
 
     const saveButton =
-      document.getElementById("saveShipment");
+      document.getElementById(
+        "saveShipment"
+      );
+
+    const searchButton =
+      document.getElementById(
+        "searchShipmentButton"
+      );
+
+    const clearSearchButton =
+      document.getElementById(
+        "clearSearchButton"
+      );
+
+    const searchInput =
+      document.getElementById(
+        "searchTrackingNumber"
+      );
 
     if (saveButton) {
       saveButton.addEventListener(
         "click",
         window.saveShipment
+      );
+    }
+
+    if (searchButton) {
+      searchButton.addEventListener(
+        "click",
+        window.searchShipment
+      );
+    }
+
+    if (clearSearchButton) {
+      clearSearchButton.addEventListener(
+        "click",
+        window.clearShipmentSearch
+      );
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener(
+        "keydown",
+        (event) => {
+          if (event.key === "Enter") {
+            window.searchShipment();
+          }
+        }
       );
     }
   }
