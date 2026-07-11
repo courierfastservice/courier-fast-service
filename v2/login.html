@@ -12,13 +12,18 @@
 <body>
 
   <header class="topbar">
-    <h2>Courier Fast Service</h2>
-    <p>Administrator Login</p>
+    <div>
+      <h2>Courier Fast Service</h2>
+      <p>Administrator Login</p>
+    </div>
   </header>
 
   <main class="dashboard">
 
-    <section class="card" style="max-width:500px;margin:auto;">
+    <section
+      class="card"
+      style="max-width:500px;margin:40px auto;"
+    >
 
       <h3>Admin Login</h3>
 
@@ -56,60 +61,53 @@
 
   </main>
 
-  <script>
+  <script type="module">
+    import {
+      loginAdmin,
+      redirectLoggedInAdmin
+    } from "./auth.js";
 
-    const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "CFS2026@";
+    redirectLoggedInAdmin();
+
+    const usernameInput =
+      document.getElementById("username");
+
+    const passwordInput =
+      document.getElementById("password");
 
     const loginButton =
       document.getElementById("loginButton");
 
-    loginButton.addEventListener("click", () => {
+    const loginMessage =
+      document.getElementById("loginMessage");
 
-      const username =
-        document.getElementById("username").value.trim();
+    function attemptLogin() {
+      const username = usernameInput.value;
+      const password = passwordInput.value;
 
-      const password =
-        document.getElementById("password").value;
-
-      const message =
-        document.getElementById("loginMessage");
-
-      if (
-        username === ADMIN_USERNAME &&
-        password === ADMIN_PASSWORD
-      ) {
-
-        sessionStorage.setItem(
-          "cfsAdminLoggedIn",
-          "true"
-        );
-
-        window.location.href = "dashboard.html";
-
+      if (loginAdmin(username, password)) {
+        loginMessage.textContent = "";
+        window.location.replace("dashboard.html");
       } else {
-
-        message.textContent =
+        loginMessage.textContent =
           "Incorrect username or password.";
-
       }
+    }
 
-    });
+    loginButton.addEventListener(
+      "click",
+      attemptLogin
+    );
 
     document.addEventListener(
       "keydown",
       (event) => {
-
-        if(event.key === "Enter"){
-
-          loginButton.click();
-
+        if (event.key === "Enter") {
+          attemptLogin();
         }
-
       }
     );
-
   </script>
 
 </body>
-        </html>
+</html>
