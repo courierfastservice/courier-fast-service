@@ -26,18 +26,57 @@
     <button
       type="button"
       id="logoutButton"
-      style="
-        width:auto;
-        padding:10px 16px;
-        margin-top:12px;
-        background:#c00000;
-      "
+      class="logout-button"
     >
       Logout
     </button>
   </header>
 
   <main class="dashboard">
+
+    <section class="statistics-grid">
+
+      <article class="stat-card stat-total">
+        <div class="stat-icon">📦</div>
+        <div>
+          <p>Total Shipments</p>
+          <h3>128</h3>
+        </div>
+      </article>
+
+      <article class="stat-card stat-transit">
+        <div class="stat-icon">🚚</div>
+        <div>
+          <p>In Transit</p>
+          <h3>34</h3>
+        </div>
+      </article>
+
+      <article class="stat-card stat-delivery">
+        <div class="stat-icon">🚛</div>
+        <div>
+          <p>Out For Delivery</p>
+          <h3>12</h3>
+        </div>
+      </article>
+
+      <article class="stat-card stat-delivered">
+        <div class="stat-icon">✅</div>
+        <div>
+          <p>Delivered</p>
+          <h3>79</h3>
+        </div>
+      </article>
+
+      <article class="stat-card stat-pending">
+        <div class="stat-icon">⏳</div>
+        <div>
+          <p>Pending</p>
+          <h3>3</h3>
+        </div>
+      </article>
+
+    </section>
 
     <section class="card">
       <h3>Create / Update Shipment</h3>
@@ -218,4 +257,4 @@
   </script>
 
 </body>
-</html>
+  </html>
