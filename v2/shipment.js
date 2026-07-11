@@ -211,11 +211,18 @@ function buildShipmentCard(shipment, key) {
       </button>
 
       <button
-        type="button"
-        onclick="deleteShipment('${escapeHtml(trackingNumber)}')"
-      >
-        Delete
-      </button>
+  type="button"
+  onclick="window.open('receipt.html?tracking=${encodeURIComponent(trackingNumber)}', '_blank')"
+>
+  🖨 Print Receipt
+</button>
+
+<button
+  type="button"
+  onclick="deleteShipment('${escapeHtml(trackingNumber)}')"
+>
+  Delete
+</button>
     </div>
   `;
 }
