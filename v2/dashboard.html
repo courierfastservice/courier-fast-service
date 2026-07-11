@@ -6,14 +6,35 @@
 
   <title>Courier Fast Service - Admin Dashboard</title>
 
+  <script>
+    if (sessionStorage.getItem("cfsAdminLoggedIn") !== "true") {
+      window.location.replace("login.html");
+    }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
   <header class="topbar">
-    <h2>Courier Fast Service</h2>
-    <p>Admin Dashboard</p>
+    <div>
+      <h2>Courier Fast Service</h2>
+      <p>Admin Dashboard</p>
+    </div>
+
+    <button
+      type="button"
+      id="logoutButton"
+      style="
+        width:auto;
+        padding:10px 16px;
+        margin-top:12px;
+        background:#c00000;
+      "
+    >
+      Logout
+    </button>
   </header>
 
   <main class="dashboard">
@@ -124,61 +145,20 @@
       />
 
       <select id="status">
-        <option value="Shipment Created">
-          Shipment Created
-        </option>
-
-        <option value="Picked Up">
-          Picked Up
-        </option>
-
-        <option value="In Transit">
-          In Transit
-        </option>
-
-        <option value="Arrived At Sorting Center">
-          Arrived At Sorting Center
-        </option>
-
-        <option value="Departed Sorting Center">
-          Departed Sorting Center
-        </option>
-
-        <option value="Customs Clearance">
-          Customs Clearance
-        </option>
-
-        <option value="Released By Customs">
-          Released By Customs
-        </option>
-
-        <option value="Flight Dispatched">
-          Flight Dispatched
-        </option>
-
-        <option value="Arrived Destination Country">
-          Arrived Destination Country
-        </option>
-
-        <option value="Out For Delivery">
-          Out For Delivery
-        </option>
-
-        <option value="Delivered">
-          Delivered
-        </option>
-
-        <option value="Delivery Attempt Failed">
-          Delivery Attempt Failed
-        </option>
-
-        <option value="On Hold">
-          On Hold
-        </option>
-
-        <option value="Returned To Sender">
-          Returned To Sender
-        </option>
+        <option value="Shipment Created">Shipment Created</option>
+        <option value="Picked Up">Picked Up</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Arrived At Sorting Center">Arrived At Sorting Center</option>
+        <option value="Departed Sorting Center">Departed Sorting Center</option>
+        <option value="Customs Clearance">Customs Clearance</option>
+        <option value="Released By Customs">Released By Customs</option>
+        <option value="Flight Dispatched">Flight Dispatched</option>
+        <option value="Arrived Destination Country">Arrived Destination Country</option>
+        <option value="Out For Delivery">Out For Delivery</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Delivery Attempt Failed">Delivery Attempt Failed</option>
+        <option value="On Hold">On Hold</option>
+        <option value="Returned To Sender">Returned To Sender</option>
       </select>
 
       <button
@@ -226,10 +206,16 @@
 
   </main>
 
-  <script
-    type="module"
-    src="shipment.js"
-  ></script>
+  <script type="module" src="shipment.js"></script>
+
+  <script>
+    document
+      .getElementById("logoutButton")
+      .addEventListener("click", function () {
+        sessionStorage.removeItem("cfsAdminLoggedIn");
+        window.location.replace("login.html");
+      });
+  </script>
 
 </body>
-  </html>
+</html>
