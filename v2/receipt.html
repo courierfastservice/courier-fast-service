@@ -1,1 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>Shipment Receipt - Courier Fast Service</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      background: #eef2f7;
+    }
+
+    .receipt-page {
+      width: min(100%, 850px);
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .receipt {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #0b4f9c;
+    }
+
+    .company-name {
+      margin: 0;
+      color: #0b4f9c;
+      font-size: 30px;
+    }
+
+    .company-subtitle {
+      margin: 5px 0 0;
+      color: #64748b;
+    }
+
+    .receipt-title {
+      text-align: right;
+    }
+
+    .receipt-title h2 {
+      margin: 0;
+      color: #172033;
+    }
+
+    .receipt-title p {
+      margin: 6px 0 0;
+      color: #64748b;
+    }
+
+    .tracking-box {
+      background: #eef5ff;
+      border: 1px solid #cfe0f7;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 24px 0;
+      text-align: center;
+    }
+
+    .tracking-box p {
+      margin: 0 0 8px;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .tracking-box h1 {
+      margin: 0;
+      color: #0b4f9c;
+      overflow-wrap: anywhere;
+    }
+
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .receipt-section {
+      border: 1px solid #dbe2ea;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .receipt-section h3 {
+      margin: 0 0 14px;
+      color: #0b4f9c;
+      font-size: 18px;
+    }
+
+    .receipt-row {
+      margin-bottom: 12px;
+    }
+
+    .receipt-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .receipt-label {
+      display: block;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .receipt-value {
+      color: #172033;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #e8f1ff;
+      color: #0b63ce;
+      font-weight: 700;
+    }
+
+    .receipt-footer {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #dbe2ea;
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .receipt-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .receipt-actions button {
+      flex: 1;
+    }
+
+    .secondary-button {
+      background: #64748b;
+    }
+
+    .loading-message,
+    .error-message {
+      text-align: center;
+      padding: 40px 20px;
+      font-weight: 700;
+    }
+
+    .error-message {
+      color: #b91c1c;
+    }
+
+    @media (max-width: 650px) {
+      .receipt-page {
+        margin: 0;
+        padding: 10px;
+      }
+
+      .receipt {
+        padding: 18px;
+        border-radius: 10px;
+      }
+
+      .receipt-header {
+        flex-direction: column;
+      }
+
+      .receipt-title {
+        text-align: left;
+      }
+
+      .receipt-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .receipt-actions {
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .receipt-page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .receipt {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 15px;
+      }
+
+      .receipt-actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="receipt-page">
+
+    <div id="receiptContainer">
+      <div class="receipt">
+        <div class="loading-message">
+          Loading shipment receipt...
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { database } from "./firebase-config.js";
+
+    import {
+      ref,
+      get,
+      child
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "Not added";
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return escapeHtml(value);
+      }
+
+      return date.toLocaleDateString();
+    }
+
+    function getTrackingNumberFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+
+      return String(params.get("tracking") || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    }
+
+    function getStatusStyle(status) {
+      const styles = {
+        "Shipment Created": {
+          background: "#e8f1ff",
+          color: "#0b63ce"
+        },
+
+        "Picked Up": {
+          background: "#e8f1ff",
+          color: "#0b63ce"
+        },
+
+        "In Transit": {
+          background: "#fff1dd",
+          color: "#c2410c"
+        },
+
+        "Customs Clearance": {
+          background: "#f3e8ff",
+          color: "#7e22ce"
+        },
+
+        "Out For Delivery": {
+          background: "#e8fff1",
+          color: "#047857"
+        },
+
+        "Delivered": {
+          background: "#dcfce7",
+          color: "#166534"
+        },
+
+        "On Hold": {
+          background: "#fff7df",
+          color: "#b45309"
+        },
+
+        "Returned To Sender": {
+          background: "#fff1f2",
+          color: "#be123c"
+        }
+      };
+
+      return styles[status] || {
+        background: "#eef2f7",
+        color: "#374151"
+      };
+    }
+
+    function buildReceipt(shipment, trackingNumber) {
+      const status = shipment.status || "Shipment Created";
+      const statusStyle = getStatusStyle(status);
+
+      return `
+        <div class="receipt">
+
+          <div class="receipt-header">
+            <div>
+              <h1 class="company-name">
+                Courier Fast Service
+              </h1>
+
+              <p class="company-subtitle">
+                Professional Courier Delivery and Package Tracking
+              </p>
+            </div>
+
+            <div class="receipt-title">
+              <h2>Shipment Receipt</h2>
+              <p>
+                Issued:
+                ${new Date().toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+
+          <div class="tracking-box">
+            <p>Tracking Number</p>
+
+            <h1>
+              ${escapeHtml(shipment.trackingNumber || trackingNumber)}
+            </h1>
+          </div>
+
+          <div class="receipt-grid">
+
+            <section class="receipt-section">
+              <h3>Sender Information</h3>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Name</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.senderName || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Phone</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.senderPhone || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Email</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.senderEmail || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Address</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.senderAddress || "Not added")}
+                </span>
+              </div>
+            </section>
+
+            <section class="receipt-section">
+              <h3>Receiver Information</h3>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Name</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.receiverName || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Phone</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.receiverPhone || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Email</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.receiverEmail || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Address</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.receiverAddress || "Not added")}
+                </span>
+              </div>
+            </section>
+
+            <section class="receipt-section">
+              <h3>Shipment Information</h3>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Status</span>
+
+                <span
+                  class="status-badge"
+                  style="
+                    background:${statusStyle.background};
+                    color:${statusStyle.color};
+                  "
+                >
+                  ${escapeHtml(status)}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Origin</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.origin || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Destination</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.destination || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Current Location</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.currentLocation || "Not added")}
+                </span>
+              </div>
+            </section>
+
+            <section class="receipt-section">
+              <h3>Package Information</h3>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Weight</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.weight || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Description</span>
+
+                <span class="receipt-value">
+                  ${escapeHtml(shipment.description || "Not added")}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Expected Delivery</span>
+
+                <span class="receipt-value">
+                  ${formatDate(shipment.deliveryDate)}
+                </span>
+              </div>
+
+              <div class="receipt-row">
+                <span class="receipt-label">Last Updated</span>
+
+                <span class="receipt-value">
+                  ${
+                    shipment.updatedAt
+                      ? escapeHtml(
+                          new Date(
+                            shipment.updatedAt
+                          ).toLocaleString()
+                        )
+                      : "Not available"
+                  }
+                </span>
+              </div>
+            </section>
+
+          </div>
+
+          <div class="receipt-actions">
+
+            <button
+              type="button"
+              id="printReceiptButton"
+            >
+              Print Receipt
+            </button>
+
+            <button
+              type="button"
+              id="closeReceiptButton"
+              class="secondary-button"
+            >
+              Close Receipt
+            </button>
+
+          </div>
+
+          <div class="receipt-footer">
+            <p>
+              Thank you for choosing Courier Fast Service.
+            </p>
+
+            <p>
+              Keep your tracking number safe for future shipment updates.
+            </p>
+          </div>
+
+        </div>
+      `;
+    }
+
+    async function loadReceipt() {
+      const container =
+        document.getElementById("receiptContainer");
+
+      const trackingNumber =
+        getTrackingNumberFromUrl();
+
+      if (!trackingNumber) {
+        container.innerHTML = `
+          <div class="receipt">
+            <div class="error-message">
+              No tracking number was provided.
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+      let snapshot;
+
+      try {
+        snapshot = await get(
+          child(
+            ref(database),
+            "shipments/" + trackingNumber
+          )
+        );
+      } catch (error) {
+        console.error(error);
+
+        container.innerHTML = `
+          <div class="receipt">
+            <div class="error-message">
+              Unable to connect to the shipment database.
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+      if (!snapshot.exists()) {
+        container.innerHTML = `
+          <div class="receipt">
+            <div class="error-message">
+              Shipment not found.
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+      const shipment = snapshot.val();
+
+      container.innerHTML =
+        buildReceipt(shipment, trackingNumber);
+
+      document
+        .getElementById("printReceiptButton")
+        .addEventListener("click", () => {
+          window.print();
+        });
+
+      document
+        .getElementById("closeReceiptButton")
+        .addEventListener("click", () => {
+          window.close();
+
+          setTimeout(() => {
+            window.history.back();
+          }, 200);
+        });
+    }
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      loadReceipt
+    );
+  </script>
+
+</body>
+  </html>
