@@ -992,4 +992,187 @@
 
         try {
           await set(
+            ref(
+              database,
+              "shipments/" +
+                currentTrackingNumber +
+                "/messages"
+            ),
+            messages
+          );
+        } catch (error) {
+          console.error(error);
+          alert("Unable to update the message.");
+          return;
+        }
+
+        currentShipment.messages = messages;
+        displayMessages();
+      };
+
+    window.deleteCustomerMessage =
+      async function (index) {
+        const confirmed = confirm(
+          "Delete this customer message?"
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        const messages =
+          Array.isArray(currentShipment?.messages)
+            ? [...currentShipment.messages]
+            : [];
+
+        messages.splice(index, 1);
+
+        try {
+          await set(
+            ref(
+              database,
+              "shipments/" +
+                currentTrackingNumber +
+                "/messages"
+            ),
+            messages
+          );
+        } catch (error) {
+          console.error(error);
+          alert("Unable to delete the message.");
+          return;
+        }
+
+        currentShipment.messages = messages;
+        displayMessages();
+      };
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+        const searchButton =
+          document.getElementById(
+            "searchButton"
+          );
+
+        const trackingInput =
+          document.getElementById(
+            "trackingInput"
+          );
+
+        const sendButton =
+          document.getElementById(
+            "sendMessageButton"
+          );
+
+        const clearButton =
+          document.getElementById(
+            "clearMessageButton"
+          );
+
+        const backButton =
+          document.getElementById(
+            "backButton"
+          );
+
+        const logoutButton =
+          document.getElementById(
+            "logoutButton"
+          );
+
+        if (searchButton) {
+          searchButton.addEventListener(
+            "click",
+            searchShipment
+          );
+        }
+
+        if (trackingInput) {
+          trackingInput.addEventListener(
+            "keydown",
+            (event) => {
+              if (event.key === "Enter") {
+                searchShipment();
+              }
+            }
+          );
+        }
+
+        if (sendButton) {
+          sendButton.addEventListener(
+            "click",
+            sendCustomerMessage
+          );
+        }
+
+        if (clearButton) {
+          clearButton.addEventListener(
+            "click",
+            () => {
+              document.getElementById(
+                "messageSubject"
+              ).value = "";
+
+              document.getElementById(
+                "messageText"
+              ).value = "";
+
+              setStatus(
+                "sendStatus",
+                "",
+                ""
+              );
+            }
+          );
+        }
+
+        if (backButton) {
+          backButton.addEventListener(
+            "click",
+            () => {
+              window.location.href =
+                "dashboard.html";
+            }
+          );
+        }
+
+        if (logoutButton) {
+          logoutButton.addEventListener(
+            "click",
+            () => {
+              sessionStorage.removeItem(
+                "cfsAdminLoggedIn"
+              );
+
+              window.location.replace(
+                "login.html"
+              );
+            }
+          );
+        }
+
+        document
+          .querySelectorAll("[data-message]")
+          .forEach((button) => {
+            button.addEventListener(
+              "click",
+              () => {
+                document.getElementById(
+                  "messageSubject"
+                ).value =
+                  "Shipment Update";
+
+                document.getElementById(
+                  "messageText"
+                ).value =
+                  button.dataset.message || "";
+              }
+            );
+          });
+      }
+    );
+  </script>
+
+</body>
+</html>
      
