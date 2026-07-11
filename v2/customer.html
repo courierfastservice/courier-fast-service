@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Track Shipment - Courier Fast Service</title>
+  <title>Track Shipment - Courier Fast Service</title>
 
-<link rel="stylesheet" href="style.css">
-
-<script type="module" src="firebase-config.js"></script>
-<script type="module" src="tracking.js"></script>
-
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-<header class="topbar">
-<h2>Courier Fast Service</h2>
-<p>Track Your Shipment</p>
-</header>
+  <header class="topbar">
+    <h2>Courier Fast Service</h2>
+    <p>Track Your Shipment</p>
+  </header>
 
-<div class="dashboard">
+  <main class="dashboard">
 
-<div class="card">
+    <section class="card">
+      <h3>Track Shipment</h3>
 
-<h3>Track Shipment</h3>
+      <input
+        type="text"
+        id="trackingInput"
+        placeholder="Enter Tracking Number"
+        autocomplete="off"
+      />
 
-<input
-type="text"
-id="trackingInput"
-placeholder="Enter Tracking Number">
+      <button type="button" id="trackShipment">
+        Track Package
+      </button>
+    </section>
 
-<button id="trackShipment">
-Track Package
-</button>
+    <section class="card">
+      <div id="trackingResult">
+        <div class="tracking-summary">
+          <h3>Shipment Tracking</h3>
+          <p>Enter your tracking number above to view the shipment journey.</p>
+        </div>
+      </div>
+    </section>
 
-</div>
+  </main>
 
-<div class="card">
-
-<div id="trackingResult">
-
-Enter your tracking number above.
-
-</div>
-
-</div>
-
-</div>
+  <script type="module" src="tracking.js"></script>
 
 </body>
 </html>
