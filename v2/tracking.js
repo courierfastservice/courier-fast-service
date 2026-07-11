@@ -72,40 +72,128 @@ function getProgressIndex(status) {
   return progressSteps.indexOf(normalizedStatus);
 }
 
+function getStatusStyle(status) {
+  const styles = {
+    "Shipment Created": {
+      background: "#e8f1ff",
+      color: "#0b63ce"
+    },
+    "Picked Up": {
+      background: "#e8f1ff",
+      color: "#0b63ce"
+    },
+    "Arrived At Sorting Center": {
+      background: "#f3e8ff",
+      color: "#7e22ce"
+    },
+    "Departed Sorting Center": {
+      background: "#fff7df",
+      color: "#b45309"
+    },
+    "In Transit": {
+      background: "#fff1dd",
+      color: "#c2410c"
+    },
+    "Flight Dispatched": {
+      background: "#fff1dd",
+      color: "#c2410c"
+    },
+    "Customs Clearance": {
+      background: "#f3e8ff",
+      color: "#7e22ce"
+    },
+    "Released By Customs": {
+      background: "#e8fff1",
+      color: "#047857"
+    },
+    "Arrived Destination Country": {
+      background: "#e8fff1",
+      color: "#047857"
+    },
+    "Out For Delivery": {
+      background: "#e8fff1",
+      color: "#047857"
+    },
+    "Delivered": {
+      background: "#dcfce7",
+      color: "#166534"
+    },
+    "Delivery Attempt Failed": {
+      background: "#fff1f2",
+      color: "#be123c"
+    },
+    "On Hold": {
+      background: "#fff7df",
+      color: "#b45309"
+    },
+    "Returned To Sender": {
+      background: "#fff1f2",
+      color: "#be123c"
+    }
+  };
+
+  return styles[status] || {
+    background: "#eef2f7",
+    color: "#374151"
+  };
+}
+
+function buildStatusBadge(status) {
+  const style = getStatusStyle(status);
+
+  return `
+    <span
+      style="
+        display:inline-block;
+        background:${style.background};
+        color:${style.color};
+        font-weight:700;
+        padding:8px 12px;
+        border-radius:999px;
+        margin-top:6px;
+      "
+    >
+      ${escapeHtml(status)}
+    </span>
+  `;
+}
+
 function buildProgressTimeline(status) {
   const currentIndex = getProgressIndex(status);
   const isException = exceptionStatuses.includes(status);
 
-  return progressSteps.map((step, index) => {
-    let className = "progress-step";
-    let description = "Pending";
+  return progressSteps
+    .map((step, index) => {
+      let className = "progress-step";
+      let description = "Pending";
 
-    if (!isException && currentIndex >= 0) {
-      if (index < currentIndex) {
-        className += " completed";
-        description = "Completed";
-      } else if (index === currentIndex) {
-        className += " current";
-        description = "Current status";
+      if (!isException && currentIndex >= 0) {
+        if (index < currentIndex) {
+          className += " completed";
+          description = "Completed";
+        } else if (index === currentIndex) {
+          className += " current";
+          description = "Current status";
+        }
       }
-    }
 
-    if (status === "Delivered") {
-      className = "progress-step completed";
-      description = "Completed";
-    }
+      if (status === "Delivered") {
+        className = "progress-step completed";
+        description = "Completed";
+      }
 
-    return `
-      <div class="${className}">
-        <div class="progress-dot"></div>
+      return `
+        <div class="${className}">
+          <div class="progress-dot"></div>
 
-        <div class="progress-content">
-          <h4>${escapeHtml(step)}</h4>
-          <p>${description}</p>
+          <div class="progress-content">
+            <h4>${escapeHtml(step)}</h4>
+            <p>${description}</p>
+          </div>
         </div>
-      </div>
-    `;
-  }).join("");
+      `;
+    })
+    .join("");
 }
 
 function buildHistory(history) {
@@ -116,24 +204,26 @@ function buildHistory(history) {
   return history
     .slice()
     .reverse()
-    .map((item) => `
-      <div class="history-item">
-        <h4>${escapeHtml(item.status || "Shipment Update")}</h4>
+    .map(
+      (item) => `
+        <div class="history-item">
+          <h4>${escapeHtml(item.status || "Shipment Update")}</h4>
 
-        <p>
-          <strong>Location:</strong>
-          ${escapeHtml(item.location || "Location not added")}
-        </p>
+          <p>
+            <strong>Location:</strong>
+            ${escapeHtml(item.location || "Location not added")}
+          </p>
 
-        ${
-          item.note
-            ? `<p>${escapeHtml(item.note)}</p>`
-            : ""
-        }
+          ${
+            item.note
+              ? `<p>${escapeHtml(item.note)}</p>`
+              : ""
+          }
 
-        <small>${formatDate(item.date)}</small>
-      </div>
-    `)
+          <small>${formatDate(item.date)}</small>
+        </div>
+      `
+    )
     .join("");
 }
 
@@ -154,39 +244,31 @@ function buildExceptionNotice(status) {
   };
 
   return `
-    <div class="tracking-summary" style="background:#fff4e5;border:1px solid #f59e0b;">
+    <div
+      class="tracking-summary"
+      style="
+        background:#fff4e5;
+        border:1px solid #f59e0b;
+      "
+    >
       <h3>${escapeHtml(status)}</h3>
       <p>${escapeHtml(messages[status])}</p>
     </div>
   `;
 }
 
-function buildFileSection(shipment) {
-  if (shipment.packageFileUrl) {
-    return `
-      <p>
-        <strong>Package Document:</strong><br>
-        <a
-          href="${escapeHtml(shipment.packageFileUrl)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View uploaded file
-        </a>
-      </p>
-    `;
+async function copyTrackingNumber(trackingNumber) {
+  try {
+    await navigator.clipboard.writeText(trackingNumber);
+    alert("Tracking number copied.");
+  } catch (error) {
+    console.error(error);
+    alert("Unable to copy the tracking number.");
   }
+}
 
-  if (shipment.packageFileName) {
-    return `
-      <p>
-        <strong>Selected File:</strong><br>
-        ${escapeHtml(shipment.packageFileName)}
-      </p>
-    `;
-  }
-
-  return "";
+function printTrackingDetails() {
+  window.print();
 }
 
 async function trackShipment() {
@@ -248,15 +330,43 @@ async function trackShipment() {
 
   const shipment = snapshot.val();
   const status = shipment.status || "Shipment Created";
+  const displayedTrackingNumber =
+    shipment.trackingNumber || trackingNumber;
 
   displayResult(`
     <div class="tracking-summary">
       <h3>Shipment Found</h3>
-      <h2>${escapeHtml(shipment.trackingNumber || trackingNumber)}</h2>
+
+      <h2>${escapeHtml(displayedTrackingNumber)}</h2>
+
+      <div
+        style="
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-bottom:18px;
+        "
+      >
+        <button
+          type="button"
+          id="copyTrackingButton"
+          style="width:auto;padding:10px 14px;"
+        >
+          Copy Tracking Number
+        </button>
+
+        <button
+          type="button"
+          id="printTrackingButton"
+          style="width:auto;padding:10px 14px;"
+        >
+          Print Details
+        </button>
+      </div>
 
       <p>
         <strong>Current Status:</strong><br>
-        ${escapeHtml(status)}
+        ${buildStatusBadge(status)}
       </p>
 
       <p>
@@ -300,8 +410,6 @@ async function trackShipment() {
           `
           : ""
       }
-
-      ${buildFileSection(shipment)}
     </div>
 
     ${buildExceptionNotice(status)}
@@ -320,21 +428,49 @@ async function trackShipment() {
       ${buildHistory(shipment.history)}
     </div>
   `);
+
+  const copyButton =
+    document.getElementById("copyTrackingButton");
+
+  const printButton =
+    document.getElementById("printTrackingButton");
+
+  if (copyButton) {
+    copyButton.addEventListener("click", () => {
+      copyTrackingNumber(displayedTrackingNumber);
+    });
+  }
+
+  if (printButton) {
+    printButton.addEventListener(
+      "click",
+      printTrackingDetails
+    );
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const button = document.getElementById("trackShipment");
-  const input = document.getElementById("trackingInput");
+  const button =
+    document.getElementById("trackShipment");
+
+  const input =
+    document.getElementById("trackingInput");
 
   if (button) {
-    button.addEventListener("click", trackShipment);
+    button.addEventListener(
+      "click",
+      trackShipment
+    );
   }
 
   if (input) {
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        trackShipment();
+    input.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Enter") {
+          trackShipment();
+        }
       }
-    });
+    );
   }
 });
