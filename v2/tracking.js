@@ -197,36 +197,79 @@ function buildProgressTimeline(status) {
 }
 
 function buildHistory(history) {
-  if (!Array.isArray(history) || history.length === 0) {
-    return "<p>No tracking history is available yet.</p>";
+  if (
+    !Array.isArray(history) ||
+    history.length === 0
+  ) {
+    return `
+      <div class="history-empty">
+        No tracking history is available yet.
+      </div>
+    `;
   }
 
   return history
     .slice()
     .reverse()
-    .map(
-      (item) => `
-        <div class="history-item">
-          <h4>${escapeHtml(item.status || "Shipment Update")}</h4>
+    .map((item, index) => {
+      const isLatest = index === 0;
 
-          <p>
-            <strong>Location:</strong>
-            ${escapeHtml(item.location || "Location not added")}
-          </p>
+      return `
+        <div class="timeline-item ${
+          isLatest ? "timeline-current" : ""
+        }">
+          <div class="timeline-marker">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+          </div>
 
-          ${
-            item.note
-              ? `<p>${escapeHtml(item.note)}</p>`
-              : ""
-          }
+          <div class="timeline-content">
+            <div class="timeline-top">
+              <h4>
+                ${escapeHtml(
+                  item.status ||
+                  "Shipment Update"
+                )}
+              </h4>
 
-          <small>${formatDate(item.date)}</small>
+              ${
+                isLatest
+                  ? `
+                    <span class="current-badge">
+                      Current
+                    </span>
+                  `
+                  : ""
+              }
+            </div>
+
+            <p class="timeline-location">
+              <strong>Location:</strong>
+              ${escapeHtml(
+                item.location ||
+                "Location not added"
+              )}
+            </p>
+
+            ${
+              item.note
+                ? `
+                  <p class="timeline-note">
+                    ${escapeHtml(item.note)}
+                  </p>
+                `
+                : ""
+            }
+
+            <small class="timeline-date">
+              ${formatDate(item.date)}
+            </small>
+          </div>
         </div>
-      `
-    )
+      `;
+    })
     .join("");
 }
-
 function buildExceptionNotice(status) {
   if (!exceptionStatuses.includes(status)) {
     return "";
