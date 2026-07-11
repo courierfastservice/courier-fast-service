@@ -231,17 +231,68 @@ function displayShipments(shipments) {
   const shipmentList =
     document.getElementById("shipmentList");
 
-  if (!shipmentList) {
-    return;
+  const shipmentValues = Object.values(shipments || {});
+
+  const totalShipments = shipmentValues.length;
+
+  const inTransitCount = shipmentValues.filter(
+    (shipment) =>
+      shipment.status === "In Transit" ||
+      shipment.status === "Flight Dispatched"
+  ).length;
+
+  const outForDeliveryCount = shipmentValues.filter(
+    (shipment) =>
+      shipment.status === "Out For Delivery"
+  ).length;
+
+  const deliveredCount = shipmentValues.filter(
+    (shipment) =>
+      shipment.status === "Delivered"
+  ).length;
+
+  const pendingCount = shipmentValues.filter(
+    (shipment) =>
+      shipment.status !== "Delivered" &&
+      shipment.status !== "Out For Delivery" &&
+      shipment.status !== "In Transit" &&
+      shipment.status !== "Flight Dispatched"
+  ).length;
+
+  const totalElement =
+    document.getElementById("totalShipments");
+
+  const transitElement =
+    document.getElementById("inTransitCount");
+
+  const deliveryElement =
+    document.getElementById("outForDeliveryCount");
+
+  const deliveredElement =
+    document.getElementById("deliveredCount");
+
+  const pendingElement =
+    document.getElementById("pendingCount");
+
+  if (totalElement) {
+    totalElement.textContent = totalShipments;
   }
 
-  const keys = Object.keys(shipments || {});
-
-  if (keys.length === 0) {
-    shipmentList.innerHTML =
-      "No shipment available.";
-    return;
+  if (transitElement) {
+    transitElement.textContent = inTransitCount;
   }
+
+  if (deliveryElement) {
+    deliveryElement.textContent = outForDeliveryCount;
+  }
+
+  if (deliveredElement) {
+    deliveredElement.textContent = deliveredCount;
+  }
+
+  if (pendingElement) {
+    pendingElement.textContent = pendingCount;
+    }
 
   shipmentList.innerHTML = keys
     .reverse()
