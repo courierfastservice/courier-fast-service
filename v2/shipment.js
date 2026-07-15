@@ -224,7 +224,7 @@ function buildShipmentCard(shipment, key) {
   Delete
 </button>
     </div>
-  `;function displayShipments(shipments) {
+  function displayShipments(shipments) {
   const shipmentList =
     document.getElementById("shipmentList");
 
@@ -232,9 +232,9 @@ function buildShipmentCard(shipment, key) {
     return;
   }
 
-  const safeShipments = shipments || {};
-  const keys = Object.keys(safeShipments);
-  const shipmentValues = Object.values(safeShipments);
+  const shipmentData = shipments || {};
+  const keys = Object.keys(shipmentData);
+  const shipmentValues = Object.values(shipmentData);
 
   const totalShipments = shipmentValues.length;
 
@@ -286,13 +286,11 @@ function buildShipmentCard(shipment, key) {
   }
 
   if (deliveryElement) {
-    deliveryElement.textContent =
-      outForDeliveryCount;
+    deliveryElement.textContent = outForDeliveryCount;
   }
 
   if (deliveredElement) {
-    deliveredElement.textContent =
-      deliveredCount;
+    deliveredElement.textContent = deliveredCount;
   }
 
   if (pendingElement) {
@@ -301,20 +299,17 @@ function buildShipmentCard(shipment, key) {
 
   if (keys.length === 0) {
     shipmentList.innerHTML =
-      "<p>No shipments available.</p>";
+      "No shipment available.";
     return;
   }
 
   shipmentList.innerHTML = keys
-    .slice()
     .reverse()
     .map((key) =>
-      buildShipmentCard(safeShipments[key], key)
+      buildShipmentCard(shipmentData[key], key)
     )
     .join("");
-  }
 }
-
 
 
 window.saveShipment = async function () {
